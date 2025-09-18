@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技能编排 - 合同审核系统</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- Vue Flow -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@vue-flow/core@1.33.5/dist/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@vue-flow/core@1.33.5/dist/theme-default.css">
+    <script src="https://cdn.jsdelivr.net/npm/@vue-flow/core@1.33.5/dist/index.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@vue-flow/controls@1.1.0/dist/index.umd.js"></script>
+    
+    <!-- Arco Design Vue -->
+    <link rel="stylesheet" href="https://unpkg.com/@arco-design/web-vue@2.54.1/dist/arco.css">
+    <script src="https://unpkg.com/@arco-design/web-vue@2.54.1/dist/arco-design-vue.umd.js"></script>
+    
+    <!-- Custom Styles -->
+    <style>
+        :root {
+            --primary-color: #266EFF;
+            --border-color: #EAEAEA;
+            --bg-color: #F7F8FC;
+            --text-primary: #333333;
+            --text-secondary: #999999;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background-color: #fff;
+            overflow: hidden;
+        }
+        
+        .designer-app {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .skill_layout {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .layout-header {
+            height: 60px;
+            background-color: var(--bg-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 14px 20px;
+        }
+        
+        .layout-content {
+            height: calc(100% - 60px);
+            position: relative;
+            display: flex;
+        }
+        
+        .card-tool_item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 64px;
+            width: 100%;
+            cursor: pointer;
+            gap: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .card-tool_item:hover {
+            background-color: #F2F4F6;
+        }
+        
+        .vue-flow {
+            background-color: #F3F4F9;
+            flex: 1;
+        }
+        
+        .card-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 12px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            width: 160px;
+            position: relative;
+        }
+        
+        .card-node.active {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(38, 110, 255, 0.2);
+        }
+        
+        .drag-box {
+            width: 160px;
+            padding: 5px 10px;
+            text-align: center;
+            border-radius: 2px;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            pointer-events: all;
+        }
+        
+        .drag-box:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .add-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+            margin: 0 auto;
+        }
+        
+        .form-item_title {
+            margin-top: 12px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .preview-button {
+            position: absolute;
+            right: 0;
+            top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 4px;
+            background: linear-gradient(90deg, #5C8AFF 0%, #786CFF 100%);
+            color: white;
+            border-radius: 8px 0 0 8px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            box-shadow: -4px 0 6px -6px rgba(0, 0, 0, 0.06);
+        }
+        
+        .preview-button:hover {
+            opacity: 0.9;
+        }
+        
+        /* 图标样式 */
+        .svg-icon {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            vertical-align: middle;
+        }
+        
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        /* 工具提示 */
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="designer-app">
+            <!-- 头部 -->
+            <div class="layout-header">
+                <div class="flex justify-between items-center h-full">
+                    <div class="flex items-center flex-1 max-w-[calc(100%-320px)]">
+                        <span class="mr-3 cursor-pointer opacity-50 hover:opacity-100">
+                            <svg class="svg-icon" style="width: 16px; height: 16px; color: rgb(160, 165, 172);" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                            </svg>
+                        </span>
+                        <span class="text-base font-medium truncate" title="{{ skillName }}">{{ skillName }}</span>
+                        <svg class="svg-icon ml-2 cursor-pointer" style="width: 16px; height: 16px; color: rgb(160, 165, 172);" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                        </svg>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="mr-4 text-xs text-gray-500 flex items-center">
+                            <svg class="svg-icon mr-1" style="width: 16px; height: 16px; color: rgb(160, 165, 172);" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                                <path d="M4.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM4.002 11a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM8.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM8.002 11a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM13 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM13 11a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                            </svg>
+                            快捷保存: Ctrl+S
+                        </div>
+                        <button @click="saveSkill" class="px-4 py-2 bg-blue-500 text-white rounded-full text-sm hover:bg-blue-600 transition-colors flex items-center gap-2">
+                            <svg class="svg-icon" style="width: 14px; height: 14px;" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z"/>
+                            </svg>
+                            保存
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 内容区 -->
+            <div class="layout-content">
+                <!-- 左侧工具栏 -->
+                <div class="w-64 border-r border-gray-200 overflow-y-auto bg-white">
+                    <div 
+                        v-for="tool in tools" 
+                        :key="tool.type"
+                        draggable="true"
+                        @dragstart="onDragStart($event, tool)"
+                        class="card-tool_item"
+                        :title="tool.name">
+                        <div class="w-5 h-5">
+                            <svg class="svg-icon" style="color: rgb(160, 165, 172);" fill="currentColor" viewBox="0 0 16 16">
+                                <path :d="tool.icon"/>
+                            </svg>
+                        </div>
+                        <div class="text-xs text-gray-600">{{ tool.name }}</div>
+                    </div>
+                </div>
+                
+                <!-- 中间画布 -->
+                <div class="flex-1 bg-gray-50 relative">
+                    <vue-flow
+                        v-model="elements"
+                        @node-click="onNodeClick"
+                        @edge-click="onEdgeClick"
+                        @connect="onConnect"
+                        :connection-mode="'loose'"
+                        class="vue-flow">
+                        <background />
+                        <controls />
+                    </vue-flow>
+                    
+                    <!-- 预览按钮 -->
+                    <div class="preview-button">
+                        <svg class="svg-icon mb-1" style="width: 16px; height: 16px; color: white;" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                            <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                        </svg>
+                        <span class="text-xs writing-mode-vertical">预览</span>
+                    </div>
+                </div>
+                
+                <!-- 右侧属性面板 -->
+                <div class="w-2/5 bg-white border-l border-gray-200 overflow-y-auto p-5">
+                    <template v-if="selectedNode">
+                        <h3 class="text-lg font-medium mb-4">节点属性</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">节点名称</label>
+                                <input v-model="selectedNode.data.label" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">节点描述</label>
+                                <textarea v-model="selectedNode.data.description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+                            <div v-if="selectedNode.type === 'smart-check'">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">检查规则</label>
+                                <select v-model="selectedNode.data.rule" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="contract">合同完整性检查</option>
+                                    <option value="risk">风险评估</option>
+                                    <option value="compliance">合规性检查</option>
+                                </select>
+                            </div>
+                        </div>
+                    </template>
+                    <template v-else>
+                        <h3 class="text-lg font-medium mb-4">技能配置</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">技能名称</label>
+                                <input v-model="skillName" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">技能描述</label>
+                                <textarea v-model="skillDescription" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">输出参数格式</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="radio" v-model="outputFormat" value="content" class="mr-2">
+                                        <span>纯文本</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" v-model="outputFormat" value="variables" class="mr-2">
+                                        <span>参数列表</span>
+                                    </label>
+                                </div>
+                                <p class="mt-2 text-sm text-gray-500">
+                                    纯文本：用户提问的原始文本。<br>
+                                    参数列表：通过AI分析用户输入中的参数信息，可以为这些参数定义名称、类型、是否必填，描述，从而让AI提取得更加准确。
+                                </p>
+                            </div>
+                            
+                            <!-- 文件上传设置 -->
+                            <div class="border-t pt-4">
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="font-medium">文件上传</span>
+                                    <a-switch v-model="fileUpload.enabled" />
+                                </div>
+                                <div v-if="fileUpload.enabled" class="space-y-4">
+                                    <div>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" v-model="fileUpload.mobileUpload" class="mr-2">
+                                            <span class="text-sm">移动端上传</span>
+                                        </label>
+                                    </div>
+                                    <div class="bg-blue-50 p-3 rounded-md">
+                                        <p class="text-sm text-blue-700">
+                                            word、pdf、txt 文件已支持文档分析，其他类型文档可通过插件自定义分析文档。
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">可传文件类型</label>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <label v-for="type in fileTypes" :key="type.value" class="flex items-center">
+                                                <input type="checkbox" :value="type.value" v-model="fileUpload.types" class="mr-2">
+                                                <span class="text-sm">{{ type.label }}</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">允许上传文件数</label>
+                                        <a-input-number v-model="fileUpload.maxCount" :min="1" :max="10" class="w-full" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, reactive } = Vue;
+        
+        const app = createApp({
+            setup() {
+                // Vue Flow 相关
+                const elements = ref([
+                    { id: '1', type: 'input', data: { label: '开始', description: '步骤一：开始' }, position: { x: 100, y: 100 } },
+                    { id: '2', type: 'default', data: { label: '智能检查', description: '步骤二：智能检查_0', rule: 'contract' }, position: { x: 100, y: 200 } },
+                    { id: '3', type: 'output', data: { label: '结束', description: '结束步骤：完成执行动作' }, position: { x: 100, y: 300 } },
+                    { id: 'e1-2', source: '1', target: '2', type: 'smoothstep' },
+                    { id: 'e2-3', source: '2', target: '3', type: 'smoothstep' }
+                ]);
+                
+                const selectedNode = ref(null);
+                const selectedEdge = ref(null);
+                
+                // 技能配置
+                const skillName = ref('GYJ_测试_合同审核');
+                const skillDescription = ref('');
+                const outputFormat = ref('content');
+                
+                // 文件上传配置
+                const fileUpload = reactive({
+                    enabled: false,
+                    mobileUpload: false,
+                    types: ['doc,docx', 'pdf'],
+                    maxCount: 1
+                });
+                
+                // 文件类型选项
+                const fileTypes = [
+                    { label: 'Word文档 (doc, docx)', value: 'doc,docx' },
+                    { label: 'PDF文件 (pdf)', value: 'pdf' },
+                    { label: 'Excel文档 (xls, xlsx)', value: 'xls,xlsx' },
+                    { label: 'PowerPoint文档 (ppt, pptx)', value: 'ppt,pptx' },
+                    { label: '文本文件 (txt)', value: 'txt' },
+                    { label: '图片文件 (jpg, jpeg, png)', value: 'jpg,jpeg,png' },
+                    { label: '视频文件 (mp4, avi)', value: 'mp4,avi' },
+                    { label: '自定义', value: 'custom' }
+                ];
+                
+                // 工具列表
+                const tools = [
+                    { type: 'prompt', name: '提示词', icon: 'M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z' },
+                    { type: 'knowledge', name: '知识库', icon: 'M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm6.5 4.5v3.003L9 8.5l.002-.5H8.5v2h1.002l.5-.5.5.5v-2l-.5.5H10v-.5l-1.5-.5-2.5 1.5v-3l2.5-1.5 2.5 1.5z' },
+                    { type: 'auxiliary', name: '辅助录入', icon: 'M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5V2zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1H4z' },
+                    { type: 'document', name: '文档分析', icon: 'M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z' },
+                    { type: 'image', name: '图片分析', icon: 'M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z' },
+                    { type: 'smart-check', name: '智能检查', icon: 'M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z' },
+                    { type: 'data-query', name: '数据查询与总结', icon: 'M0 2.5A1.5 1.5 0 0 1 1.5 1h13A1.5 1.5 0 0 1 16 2.5v11A1.5 1.5 0 0 1 14.5 15H1.5A1.5 1.5 0 0 1 0 13.5v-11zM1.5 2a.5.5 0 0 0-.5.5v11a.5.5 0 0 0 .5.5H6V9.879l2-2V3.5a.5.5 0 0 0-.5-.5H1.5zM6 10v5h6.5a.5.5 0 0 0 .5-.5V10H6z' },
+                    { type: 'message', name: '消息卡片', icon: 'M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414L2 15.586V2a1 1 0 0 1 1-1h11zM2 0a2 2 0 0 0-2 2v15.5a.5.5 0 0 0 .854.354l3-3A2 2 0 0 1 4.414 14H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z' },
+                    { type: 'interactive', name: '交互卡片', icon: 'M2 3.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm.5 3a.5.5 0 0 0 0 1h11a.5.5 0 0 0 0-1h-11zm0 3a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1h-6zm0 3a.5.5 0 0 0 0 1h11a.5.5 0 0 0 0-1h-11z' },
+                    { type: 'selector', name: '选择器', icon: 'M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z' },
+                    { type: 'intention', name: '意图识别', icon: 'M8 5.5a.5.5 0 0 0-1 0v2h-2a.5.5 0 0 0 0 1h2v2a.5.5 0 0 0 1 0v-2h2a.5.5 0 0 0 0-1h-2v-2z' },
+                    { type: 'template', name: '文本模板', icon: 'M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H4z' },
+                    { type: 'plugin', name: '插件', icon: 'M8.5 5.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z' }
+                ];
+                
+                // 事件处理
+                const onNodeClick = (event) => {
+                    selectedNode.value = event.node;
+                    selectedEdge.value = null;
+                };
+                
+                const onEdgeClick = (event) => {
+                    selectedEdge.value = event.edge;
+                    selectedNode.value = null;
+                };
+                
+                const onConnect = (params) => {
+                    elements.value.push({
+                        id: `e${params.source}-${params.target}`,
+                        source: params.source,
+                        target: params.target,
+                        type: 'smoothstep'
+                    });
+                };
+                
+                const onDragStart = (event, tool) => {
+                    event.dataTransfer.setData('application/vueflow', tool.type);
+                    event.dataTransfer.effectAllowed = 'move';
+                };
+                
+                const saveSkill = () => {
+                    alert('保存成功！');
+                };
+                
+                return {
+                    elements,
+                    selectedNode,
+                    selectedEdge,
+                    skillName,
+                    skillDescription,
+                    outputFormat,
+                    fileUpload,
+                    fileTypes,
+                    tools,
+                    onNodeClick,
+                    onEdgeClick,
+                    onConnect,
+                    onDragStart,
+                    saveSkill
+                };
+            }
+        });
+        
+        // 注册 Arco Design Vue
+        app.use(ArcoDesignVue);
+        
+        // 注册 Vue Flow
+        app.use(VueFlow);
+        
+        app.mount('#app');
+    </script>
+    
+    <!-- 拖放处理 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const vueFlowContainer = document.querySelector('.vue-flow');
+            
+            vueFlowContainer.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const type = e.dataTransfer.getData('application/vueflow');
+                
+                if (type) {
+                    const position = { x: e.offsetX, y: e.offsetY };
+                    const newNode = {
+                        id: `${Date.now()}`,
+                        type: 'default',
+                        data: { 
+                            label: tools.find(t => t.type === type)?.name || type,
+                            description: '新节点'
+                        },
+                        position
+                    };
+                    
+                    app._instance.ctx.elements.value.push(newNode);
+                }
+            });
+            
+            vueFlowContainer.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            });
+        });
+    </script>
+</body>
+</html>

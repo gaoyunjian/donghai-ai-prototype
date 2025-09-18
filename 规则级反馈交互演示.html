@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>规则级反馈交互演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f7fa;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .demo-section {
+            padding: 40px;
+        }
+
+        .rule-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .rule-content {
+            margin-bottom: 20px;
+        }
+
+        .rule-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .rule-description {
+            color: #6c757d;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* 反馈按钮区域 */
+        .feedback-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .feedback-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .feedback-btn {
+            padding: 8px 16px;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            color: #6c757d;
+        }
+
+        .feedback-btn:hover {
+            border-color: #adb5bd;
+            background: #f8f9fa;
+        }
+
+        .feedback-btn.accept {
+            border-color: #28a745;
+            color: #28a745;
+        }
+
+        .feedback-btn.accept:hover {
+            background: #d4edda;
+        }
+
+        .feedback-btn.reject {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+
+        .feedback-btn.reject:hover {
+            background: #f8d7da;
+        }
+
+        /* 状态显示 */
+        .feedback-status {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .feedback-status.accepted {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-status.rejected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .feedback-status:hover {
+            opacity: 0.8;
+        }
+
+        /* 浮层样式 - 轻量级popover */
+        .popover {
+            display: none;
+            position: absolute;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 200;
+            min-width: 320px;
+            max-width: 400px;
+        }
+
+        .popover-header {
+            padding: 16px 20px 12px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .popover-content {
+            padding: 16px 20px;
+        }
+
+        .preset-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .preset-tab {
+            padding: 6px 12px;
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            border-radius: 16px;
+            font-size: 13px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .preset-tab:hover {
+            background: #e8f4fd;
+            border-color: #1976d2;
+            color: #1976d2;
+        }
+
+        .preset-tab.selected {
+            background: #1976d2;
+            border-color: #1976d2;
+            color: white;
+        }
+
+        .custom-input-section {
+            margin-top: 16px;
+        }
+
+        .custom-input-label {
+            display: block;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .popover-actions {
+            padding: 12px 20px 16px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .popover-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .popover-btn.secondary {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .popover-btn.secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .popover-btn.primary {
+            background: #1976d2;
+            color: white;
+        }
+
+        .popover-btn.primary:hover {
+            background: #1565c0;
+        }
+
+        .reason-input {
+            width: 100%;
+            min-height: 60px;
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 13px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .reason-input:focus {
+            outline: none;
+            border-color: #80bdff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        /* 只读浮层 - 优化hover交互 */
+        .tooltip {
+            position: absolute;
+            background: #2c3e50;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            max-width: 300px;
+            z-index: 200;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 20px;
+            border: 6px solid transparent;
+            border-top-color: #2c3e50;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .tooltip-content {
+            margin-bottom: 8px;
+        }
+
+        .tooltip-actions {
+            text-align: right;
+        }
+
+        .edit-btn {
+            background: none;
+            border: none;
+            color: #ffc107;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+
+        .edit-btn:hover {
+            background: rgba(255, 193, 7, 0.1);
+        }
+
+        /* 扩展hover区域 */
+        .hover-area {
+            position: relative;
+        }
+
+        .hover-area::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            z-index: -1;
+        }
+
+        .demo-info {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: #1565c0;
+        }
+
+        .demo-info strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>规则级反馈交互演示</h1>
+            <p>东航采招AI专项平台 - 规则级反馈功能原型</p>
+        </div>
+
+        <div class="demo-section">
+            <div class="demo-info">
+                <strong>交互说明：</strong>
+                点击【接受】或【不接受】按钮进行反馈，已反馈状态下可点击状态标签重新选择。
+                拒绝状态下鼠标悬停可查看原因，并可通过编辑按钮修改原因。
+            </div>
+
+            <!-- 示例规则1 -->
+            <div class="rule-item" data-rule-id="rule-1">
+                <div class="rule-content">
+                    <div class="rule-title">供应商资质检查规则</div>
+                    <div class="rule-description">
+                        检测到供应商营业执照有效期不足6个月，建议要求供应商更新相关证件。
+                        根据采购管理规定，供应商证件有效期应不少于合同履行期加6个月。
+                    </div>
+                </div>
+                
+                <div class="feedback-area">
+                    <div class="feedback-buttons">
+                        <button class="feedback-btn accept" onclick="acceptRule('rule-1')">接受</button>
+                        <button class="feedback-btn reject" onclick="rejectRule('rule-1', event)">不接受</button>
+                    </div>
+                    
+                    <div class="feedback-status accepted" onclick="resetFeedback('rule-1')">
+                        <span>✅ 已接受</span>
+                    </div>
+                    
+                    <div class="feedback-status rejected hover-area" onclick="resetFeedback('rule-1')" onmouseenter="showTooltip(event, 'rule-1')" onmouseleave="scheduleHideTooltip()">
+                        <span>❌ 已拒绝</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 示例规则2 -->
+            <div class="rule-item" data-rule-id="rule-2">
+                <div class="rule-content">
+                    <div class="rule-title">价格合理性检查规则</div>
+                    <div class="rule-description">
+                        检测到报价比市场均价高出25%，建议进一步核实价格合理性。
+                        同类产品市场均价为8,500元，当前报价为10,625元。
+                    </div>
+                </div>
+                
+                <div class="feedback-area">
+                    <div class="feedback-buttons">
+                        <button class="feedback-btn accept" onclick="acceptRule('rule-2')">接受</button>
+                        <button class="feedback-btn reject" onclick="rejectRule('rule-2', event)">不接受</button>
+                    </div>
+                    
+                    <div class="feedback-status accepted" onclick="resetFeedback('rule-2')">
+                        <span>✅ 已接受</span>
+                    </div>
+                    
+                    <div class="feedback-status rejected hover-area" onclick="resetFeedback('rule-2')" onmouseenter="showTooltip(event, 'rule-2')" onmouseleave="scheduleHideTooltip()">
+                        <span>❌ 已拒绝</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 示例规则3 -->
+            <div class="rule-item" data-rule-id="rule-3">
+                <div class="rule-content">
+                    <div class="rule-title">技术规格符合性检查</div>
+                    <div class="rule-description">
+                        检测到技术参数中CPU规格低于招标要求，当前为i5-10400，要求为i7-11700或同等性能。
+                        建议要求供应商提供符合规格的产品或技术说明。
+                    </div>
+                </div>
+                
+                <div class="feedback-area">
+                    <div class="feedback-buttons">
+                        <button class="feedback-btn accept" onclick="acceptRule('rule-3')">接受</button>
+                        <button class="feedback-btn reject" onclick="rejectRule('rule-3', event)">不接受</button>
+                    </div>
+                    
+                    <div class="feedback-status accepted" onclick="resetFeedback('rule-3')">
+                        <span>✅ 已接受</span>
+                    </div>
+                    
+                    <div class="feedback-status rejected hover-area" onclick="resetFeedback('rule-3')" onmouseenter="showTooltip(event, 'rule-3')" onmouseleave="scheduleHideTooltip()">
+                        <span>❌ 已拒绝</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 拒绝原因输入浮层 -->
+    <div class="popover" id="rejectPopover">
+        <div class="popover-header">请说明不接受的原因</div>
+        <div class="popover-content">
+            <div class="preset-tabs">
+                <div class="preset-tab" data-reason="结果不准确">结果不准确</div>
+                <div class="preset-tab" data-reason="提示不清晰">提示不清晰</div>
+                <div class="preset-tab" data-reason="缺少依据">缺少依据</div>
+                <div class="preset-tab" data-reason="不适用本场景">不适用本场景</div>
+            </div>
+            <div class="custom-input-section">
+                <label class="custom-input-label">自定义原因（可选）</label>
+                <textarea class="reason-input" id="reasonInput" placeholder="请输入其他原因..."></textarea>
+            </div>
+        </div>
+        <div class="popover-actions">
+            <button class="popover-btn secondary" onclick="closeRejectPopover()">取消</button>
+            <button class="popover-btn primary" onclick="confirmReject()">确认</button>
+        </div>
+    </div>
+
+
+
+    <!-- 悬停提示 -->
+    <div class="tooltip" id="tooltip">
+        <div class="tooltip-content" id="tooltipContent"></div>
+        <div class="tooltip-actions">
+            <button class="edit-btn" onclick="editReason(event)">✏️ 修改</button>
+        </div>
+    </div>
+
+<script>
+        // =============================================================================
+        // 最终版脚本 - 2025年9月18日
+        // =============================================================================
+
+        // 全局变量
+        const feedbackData = {};
+        let currentRuleId = null;
+        let currentEditRuleId = null;
+        let selectedReasons = [];
+        let hideTooltipTimer = null;
+
+        /**
+         * 辅助函数：显示、定位并设置弹窗的完整样式
+         */
+        function showAndPositionPopover(popoverEl, triggerEl) {
+            const rect = triggerEl.getBoundingClientRect();
+            let left = rect.left;
+            let top = rect.bottom + 8;
+            const margin = 10;
+            const popoverWidth = 400;
+            const popoverHeight = 350;
+
+            // 边界检查
+            if (left + popoverWidth > window.innerWidth - margin) {
+                left = window.innerWidth - popoverWidth - margin;
+            }
+            if (left < margin) {
+                left = margin;
+            }
+            if (top + popoverHeight > window.innerHeight - margin) {
+                const topPosition = rect.top - popoverHeight - 8;
+                top = topPosition >= margin ? topPosition : window.innerHeight - popoverHeight - margin;
+            }
+            if (top < margin) {
+                top = margin;
+            }
+
+            // 重置并应用完整样式
+            popoverEl.className = 'popover';
+            popoverEl.removeAttribute('style');
+            popoverEl.offsetHeight;
+
+            popoverEl.style.cssText = `
+                position: fixed !important; left: ${left}px !important; top: ${top}px !important;
+                display: block !important; visibility: visible !important; opacity: 1 !important;
+                z-index: 99999 !important; background: white !important; border: 1px solid #e0e0e0 !important;
+                border-radius: 8px !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+                min-width: 320px !important; max-width: 400px !important; padding: 0 !important; margin: 0 !important;
+            `;
+        }
+
+        // 初始化/重置 预设标签
+        function initPresetTabs() {
+            document.querySelectorAll('.preset-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const reason = this.dataset.reason;
+                    this.classList.toggle('selected');
+                    if (this.classList.contains('selected')) {
+                        if (!selectedReasons.includes(reason)) selectedReasons.push(reason);
+                    } else {
+                        selectedReasons = selectedReasons.filter(r => r !== reason);
+                    }
+                });
+            });
+        }
+        function resetPresetTabs() {
+            document.querySelectorAll('.preset-tab').forEach(tab => tab.classList.remove('selected'));
+            selectedReasons = [];
+        }
+
+        // 核心交互函数
+        function acceptRule(ruleId) {
+            const ruleItem = document.querySelector(`[data-rule-id="${ruleId}"]`);
+            ruleItem.querySelector('.feedback-buttons').style.display = 'none';
+            ruleItem.querySelector('.feedback-status.accepted').style.display = 'flex';
+            ruleItem.querySelector('.feedback-status.rejected').style.display = 'none';
+            feedbackData[ruleId] = { status: 'accepted', reason: null, timestamp: new Date().toISOString() };
+        }
+        function rejectRule(ruleId, event) {
+            event.stopPropagation();
+            currentRuleId = ruleId;
+            resetPresetTabs();
+            document.getElementById('reasonInput').value = '';
+            const popover = document.getElementById('rejectPopover');
+            showAndPositionPopover(popover, event.target);
+        }
+        function editReason(event) {
+            event.stopPropagation();
+            if (!currentEditRuleId) return;
+            const feedback = feedbackData[currentEditRuleId];
+            if (!feedback) return;
+
+            const tooltip = document.getElementById('tooltip');
+            currentRuleId = currentEditRuleId; // 在编辑时，同步 currentRuleId
+            hideTooltip();
+            resetPresetTabs();
+
+            const popover = document.getElementById('rejectPopover');
+            if (feedback.reason && feedback.reason !== '未说明原因') {
+                const reasons = feedback.reason.split('；');
+                const presetReasons = ['结果不准确', '提示不清晰', '缺少依据', '不适用本场景'];
+                let customReasons = [];
+                reasons.forEach(reason => {
+                    if (presetReasons.includes(reason)) {
+                        const tab = popover.querySelector(`[data-reason="${reason}"]`);
+                        if (tab) {
+                            tab.classList.add('selected');
+                            selectedReasons.push(reason);
+                        }
+                    } else {
+                        customReasons.push(reason);
+                    }
+                });
+                popover.querySelector('#reasonInput').value = customReasons.join('；');
+            } else {
+                popover.querySelector('#reasonInput').value = '';
+            }
+            
+            popover.querySelector('.popover-header').textContent = '修改不接受原因';
+            const confirmBtn = popover.querySelector('.popover-btn.primary');
+            confirmBtn.textContent = '保存';
+            confirmBtn.setAttribute('onclick', 'confirmEdit()');
+            
+            showAndPositionPopover(popover, tooltip);
+        }
+
+        // 确认与关闭函数
+        function confirmReject() {
+            const customReason = document.getElementById('reasonInput').value.trim();
+            let reasons = [...selectedReasons];
+            if (customReason) {
+                reasons.push(customReason);
+            }
+            const reasonText = reasons.length > 0 ? reasons.join('；') : '未说明原因';
+            const ruleItem = document.querySelector(`[data-rule-id="${currentRuleId}"]`);
+            ruleItem.querySelector('.feedback-buttons').style.display = 'none';
+            ruleItem.querySelector('.feedback-status.accepted').style.display = 'none';
+            ruleItem.querySelector('.feedback-status.rejected').style.display = 'flex';
+            feedbackData[currentRuleId] = { status: 'rejected', reason: reasonText, timestamp: new Date().toISOString() };
+            closeRejectPopover();
+        }
+        function confirmEdit() {
+            const customReason = document.getElementById('reasonInput').value.trim();
+            let reasons = [...selectedReasons];
+            if (customReason) {
+                reasons.push(customReason);
+            }
+            const reasonText = reasons.length > 0 ? reasons.join('；') : '未说明原因';
+            if (feedbackData[currentRuleId]) {
+                feedbackData[currentRuleId].reason = reasonText;
+                feedbackData[currentRuleId].timestamp = new Date().toISOString();
+            }
+            closeRejectPopover();
+        }
+        function closeRejectPopover() {
+            const popover = document.getElementById('rejectPopover');
+            popover.style.display = 'none';
+            const header = popover.querySelector('.popover-header');
+            const confirmBtn = popover.querySelector('.popover-btn.primary');
+            header.textContent = '请说明不接受的原因';
+            confirmBtn.textContent = '确认';
+            confirmBtn.setAttribute('onclick', 'confirmReject()');
+            currentRuleId = null;
+            resetPresetTabs();
+        }
+
+        // 状态重置与悬停提示函数
+        function resetFeedback(ruleId) {
+            const ruleItem = document.querySelector(`[data-rule-id="${ruleId}"]`);
+            ruleItem.querySelector('.feedback-buttons').style.display = 'flex';
+            ruleItem.querySelector('.feedback-status.accepted').style.display = 'none';
+            ruleItem.querySelector('.feedback-status.rejected').style.display = 'none';
+            delete feedbackData[ruleId];
+            hideTooltip();
+        }
+        function showTooltip(event, ruleId) {
+            if (hideTooltipTimer) { clearTimeout(hideTooltipTimer); }
+            const feedback = feedbackData[ruleId];
+            if (!feedback || feedback.status !== 'rejected') return;
+            const tooltip = document.getElementById('tooltip');
+            tooltip.querySelector('#tooltipContent').innerHTML = feedback.reason ? `<strong>拒绝原因：</strong><br>${feedback.reason}` : '<strong>暂无备注</strong>';
+            const rect = event.target.getBoundingClientRect();
+            tooltip.style.left = rect.left + 'px';
+            tooltip.style.top = (rect.top - tooltip.offsetHeight - 10) + 'px';
+            tooltip.classList.add('show');
+            currentEditRuleId = ruleId;
+            tooltip.addEventListener('mouseenter', cancelHideTooltip);
+            tooltip.addEventListener('mouseleave', scheduleHideTooltip);
+        }
+        function cancelHideTooltip() {
+            if (hideTooltipTimer) { clearTimeout(hideTooltipTimer); }
+        }
+        function scheduleHideTooltip() {
+            hideTooltipTimer = setTimeout(hideTooltip, 300);
+        }
+        function hideTooltip() {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.classList.remove('show');
+            currentEditRuleId = null;
+            tooltip.removeEventListener('mouseenter', cancelHideTooltip);
+            tooltip.removeEventListener('mouseleave', scheduleHideTooltip);
+        }
+
+        // 事件监听器
+        document.addEventListener('DOMContentLoaded', function() {
+            initPresetTabs();
+        });
+        document.addEventListener('click', function(e) {
+            const rejectPopover = document.getElementById('rejectPopover');
+            if (rejectPopover && !rejectPopover.contains(e.target) && rejectPopover.style.display === 'block') {
+                // 如果点击的目标不是 edit-btn 或其子元素，则关闭
+                if (!e.target.closest('.edit-btn')) {
+                    closeRejectPopover();
+                }
+            }
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeRejectPopover();
+                hideTooltip();
+            }
+        });
+    </script>
+
+</body>
+</html>

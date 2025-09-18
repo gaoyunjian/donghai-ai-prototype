@@ -1,0 +1,759 @@
+/******Form子控件Begin******/
+
+/***公共部分Begin***/
+
+/*必填背景清空，不需要背景色*/
+
+/*Radiobuttonlist*/
+.miniux-radiobuttonlist .mini-list-inner
+{
+    min-height: 22px; /* 最小高度避免验证时感叹号显示不出来 */
+}
+
+.miniux-radiobuttonlist .mini-list-inner
+{
+    /* 控件右侧留一点控件，校验失败时显示红色感叹号用 */
+    margin-right: 16px;
+}
+
+/*Checkboxlist*/
+.mini-checkboxlist-item
+{
+    height: 26px;
+    line-height: 26px;
+}
+
+    .mini-checkboxlist-item input
+    {
+        width: 16px;
+        height: 16px;
+        vertical-align: middle;
+        margin: 0 4px 0 0;
+        padding: 0;
+    }
+
+.mini-checkboxlist .mini-list-inner
+{
+    /* 控件右侧留一点控件，校验失败时显示红色感叹号用 */
+    margin-right: 16px;
+    margin-top:1px;
+}
+
+
+
+/*Lookup*/
+.mini-lookup .mini-buttonedit-icon
+{
+    background-repeat: no-repeat;
+    background-position: -240px -30px;
+}
+
+/*Datepicker*/
+.mini-datepicker .mini-buttonedit-icon, .mini-datepicker-ex .mini-buttonedit-icon
+{
+    background-repeat: no-repeat;
+    background-position: -241px -61px;
+}
+
+
+/*Ccalendar*/
+
+/*Searchbox*/
+.mini-searchbox .mini-buttonedit-border
+{
+    padding-right: 24px;
+}
+
+.mini-searchbox .mini-buttonedit-button
+{
+    height: 20px;
+    margin-top: 2px;
+    border-left: 1px solid #B2B2B2;
+}
+
+.mini-searchbox .mini-buttonedit-icon
+{
+    background: url('/_frontend/component/miniux/images/searchbox/search.png') no-repeat center center;
+    width: 24px;
+    height: 20px;
+}
+
+.mini-searchbox .mini-buttonedit-button-hover .mini-buttonedit-icon
+{
+    background: url('/_frontend/component/miniux/images/searchbox/search-blue.png') no-repeat center center;
+}
+
+/******Form子控件End******/
+
+
+/*******************Grid控件Begin**************************/
+/*Grid的样式也会影响到Treegrid的样式，因为部分是共用的*/
+.mini-grid-border
+{
+    border-width: 1px;
+    border-style: solid;
+}
+
+.mini-grid-header
+{
+    background-attachment: scroll;
+    background-repeat: repeat-x;
+    background-position: left top;
+}
+
+.mini-grid-headerCell-inner
+{
+    line-height: 25px;
+}
+
+.mini-grid-headerCell, .mini-grid-topRightCell
+{
+    border-right-width: 1px;
+    border-right-style: solid;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+}
+
+.mini-grid .mini-grid-pager .mini-buttonedit-icon
+{
+    background-position: center center;
+}
+
+.mini-grid-columnproxy
+{
+    background-attachment: scroll;
+    background-repeat: repeat-x;
+    background-position: left top;
+    border-width: 1px;
+    border-style: solid;
+}
+
+/* 增加内边距，让行高达到 30px */
+.mini-grid .mini-grid-cell
+{
+    padding-top: 4px;
+    padding-bottom: 4px;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.mini-grid .mini-checkcolumn .mini-grid-cell-inner input
+{
+    margin: 3px 3px 3px 4px;
+    vertical-align: top;
+}
+
+.mini-grid .mini-grid-headerCell-inner
+{
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+/* 分页元素垂直居中对齐 */
+.mini-grid .mini-pager .mini-button-iconOnly
+{
+    margin-top: 1px;
+}
+
+.mini-grid .mini-pager .separator
+{
+    position: relative;
+    top: 1px;
+}
+
+.mini-grid .mini-pager .mini-pager-size .separator
+{
+    position: relative;
+    top: -1px;
+}
+/* 内部的下拉保持原本高度 */
+.mini-grid-pager .mini-combobox .mini-buttonedit-input, .mini-grid-pager .mini-combobox .mini-buttonedit-border
+{
+    height: 18px;
+    line-height: 18px;
+    padding: 0;
+}
+
+.mini-grid-pager .mini-combobox .mini-buttonedit-button
+{
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+}
+
+.mini-grid-pager .mini-combobox .mini-buttonedit-icon
+{
+    width: 18px;
+    height: 18px;
+    background-position: -236px -84px;
+}
+
+/*Grid分页相关样式*/
+.mini-pager-first
+{
+    background-repeat: no-repeat;
+    background-position: 0px 5px;
+}
+
+.mini-button-text
+{
+    padding: 5px 15px;
+    font-size: 14px;
+}
+
+.mini-pager .mini-button-text
+{
+    font-size: 12px;
+}
+
+.mini-button, a.mini-button
+{
+    color: #201F35;
+}
+
+.mini-placeholder-label
+{
+    line-height: 24px;
+}
+
+/*******************Grid控件End**************************/
+
+
+/*******************Toolbar控件Begin**************************/
+.mini-toolbar
+{
+    background: none;
+    border: none;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+}
+
+.separator
+{
+    border-left-style: solid;
+    border-left-width: 1px;
+}
+
+.header
+{
+    border: none;
+}
+
+.mini-menu
+{
+    font-size:14px;
+}
+
+.mini-menu-border
+{
+    border-width: 1px;
+    border-style: solid;
+}
+
+.mini-menu-popup
+{
+    background-repeat: repeat-x;
+}
+
+.mini-menuitem-selected
+{
+    background-repeat: repeat-x;
+    background-position: 0 0;
+}
+
+.mini-separator
+{
+    border-top-style: solid;
+    border-top-width: 1px;
+}
+
+.mini-menu-topArrow, .mini-menu-bottomArrow
+{
+    background-position: 0 -90px;
+}
+
+.mini-menu-bottomArrow
+{
+    background-position: 0 -120px;
+}
+/* menu horizontal */
+.mini-menu-horizontal .mini-menu-popup
+{
+    border-width: 0px;
+}
+
+.mini-menuitem-allow
+{
+    background-image: none;
+}
+
+.mini-menu-horizontal .mini-menuitem-allow
+{
+    background-position: -480px -150px;
+}
+
+.mini-menu-horizontal .mini-menu-inner
+{
+    background: none;
+}
+
+/* 菜单按钮鼠标统一为手型 */
+.mini-menu-horizontal .mini-menuitem, .mini-menu-horizontal .mini-menuitem-text
+{
+    cursor: pointer;
+}
+
+.mini-menu-horizontal .mini-disabled, .mini-menu-horizontal .mini-disabled .mini-menuitem-text
+{
+    cursor: default;
+}
+/* 修正菜单 hover 跳动的问题 */
+.mini-menuitem
+{
+    line-height: 20px;
+    border: none;
+    _border: 1px solid tomato; /* 修正 IE6 边框透明*/
+    _filter: chroma(color=tomato);
+    padding: 0;
+}
+
+.mini-menuitem-icon
+{
+    background-repeat: no-repeat;
+}
+
+.mini-menuitem-hover
+{
+    padding: 0;
+}
+
+/*******************Toolbar控件End**************************/
+
+
+/*******************Tree控件Begin**************************/
+
+.mini-treegrid-header
+{
+    border-bottom: none;
+}
+
+.mini-treegrid-headerInner
+{
+    background-repeat: repeat-x;
+    background-position: 0 0;
+}
+
+.mini-tree-hottrack .mini-tree-node-hover, .mini-tree-node-hover .mini-tree-nodeshow
+{
+    border-width: 1px;
+    border-style: solid;
+}
+
+.mini-tree-selectedNode .mini-tree-nodeshow
+{
+    border-width: 1px;
+    border-style: solid;
+}
+/* 修正树节点 hover 跳动的问题 */
+.mini-tree-node-hover .mini-tree-nodeshow
+{
+    padding-left: 2px;
+    padding-right: 3px;
+}
+
+.mini-tree-selectedNode .mini-tree-nodeshow
+{
+    padding-left: 2px;
+    padding-right: 3px;
+}
+
+.hide-ecicon .mini-tree-node-ecicon
+{
+    display: none;
+}
+
+body .mini-tree-showArrows .mini-tree-collapse .mini-tree-node-ecicon, body .mini-tree-showArrows .mini-tree-expand .mini-tree-node-ecicon
+{
+    background-position-y: center;
+}
+
+/*******************Tree控件End**************************/
+
+
+
+
+/*mini-mask*/
+.mini-mask-background
+{
+    display: none; /* loading 不需要背景色 */
+}
+
+
+/*mini-layout*/
+.mini-layout-region-west
+{
+    border: 0 none;
+}
+
+.mini-layout .mini-tools
+{
+    display: none;
+}
+
+.mini-layout-region-header
+{
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+}
+
+.mini-layout-region-west .mini-layout-region-header .mini-tools-collapse
+{
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+}
+
+.mini-layout-region-west .mini-tools-collapse
+{
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+}
+
+.mini-layout-region-east .mini-tools-collapse
+{
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+}
+
+.mini-layout-region-north .mini-tools-collapse
+{
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+}
+
+.mini-layout-region-south .mini-tools-collapse
+{
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+}
+
+.mini-layout-proxy-west .mini-tools-collapse
+{
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+}
+
+.mini-layout-proxy-east .mini-tools-collapse
+{
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+}
+
+.mini-layout-proxy-north .mini-tools-collapse
+{
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+}
+
+.mini-layout-proxy-south .mini-tools-collapse
+{
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+}
+
+/****************** window(打开的面板) ******************/
+.mini-window
+{
+    -webkit-box-shadow: 0 0 6px rgba(0,0,0,.5);
+    box-shadow: 0 0 6px rgba(0,0,0,.5);
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+}
+
+.mini-popup .mini-panel
+{
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    -webkit-border-radius: 0;
+    border-radius: 0;
+}
+
+.mini-window .mini-panel-border
+{
+    border-width: 0;
+}
+
+.mini-window .mini-panel-header
+{
+    height: 29px;
+}
+
+.mini-window .mini-panel-title
+{
+    height: 25px;
+    line-height: 25px;
+    font-size: 14px;
+}
+
+.mini-window .mini-tools
+{
+    top: 0;
+}
+
+    .mini-window .mini-tools span
+    {
+        margin-top: 0;
+        width: 27px;
+        height: 27px;
+        vertical-align: middle;
+    }
+
+.mini-modal
+{
+    opacity: 0.5;
+    -moz-opacity: 0.5;
+    filter: alpha(opacity=50);
+}
+/*------------------------- panel -----------------------*/
+.mini-panel-border
+{
+    border-width: 1px;
+    border-style: solid;
+}
+
+.mini-panel-header
+{
+    background: #E3E6E8;
+    font-weight: bold;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+}
+
+.mini-panel-header-inner
+{
+    padding-top: 2px;
+}
+
+.mini-panel-toolbar
+{
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+}
+
+.mini-panel-footer
+{
+    border-top-style: solid;
+    border-top-width: 1px;
+}
+
+.mini-panel-collapse .mini-tools-collapse
+{
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+}
+
+.mini-tools-max, .mini-tools-restore, .mini-tools .mini-tools-collapse, .mini-tools .mini-tools-expand, .mini-tools-close
+{
+    background-repeat: no-repeat;
+}
+
+.mini-tools-max
+{
+    background-position: 8px -22px;
+}
+
+.mini-tools-min
+{
+    background-image: none;
+}
+
+.mini-tools-refresh
+{
+    background-image: none;
+}
+
+.mini-tools-restore
+{
+    background-position: 12px -50px;
+}
+
+.mini-tools .mini-tools-collapse
+{
+    background-position: -240px -330px;
+}
+
+.mini-tools .mini-tools-expand
+{
+    background-position: -240px -360px;
+}
+
+.mini-tools-close
+{
+    background-position: 8px 8px;
+}
+
+.mini-tools .mini-tools-collapse, .mini-tools .mini-tools-expand, .mini-tools-close
+{
+    width: 15px;
+}
+
+/*----------------------------------- button ----------------------------------*/
+.mini-button
+{
+    border-width: 1px;
+    border-style: solid;
+}
+
+body .mini-button-pressed, body a:hover.mini-button-pressed,
+body .mini-button-checked, body a:hover.mini-button-checked,
+body a.mini-button-popup, body a:hover.mini-button-popup
+{
+    border-width: 1px;
+    border-style: solid;
+}
+
+body .mini-button-disabled, body a:hover.mini-button-disabled
+{
+    background-repeat: repeat-x;
+    background-position: 0 0;
+}
+
+/*------------------- navbar ------------------*/
+.mini-outlookbar-border
+{
+    border-width: 1px;
+    border-style: solid;
+}
+
+.mini-outlookbar .mini-outlookbar-groupTitle
+{
+    font-weight: normal;
+}
+/* view2 */
+.mini-outlookbar-view2 .mini-outlookbar-groupHeader
+{
+    border-style: solid;
+    border-width: 1px;
+}
+/* view3 */
+.mini-outlookbar-view3 .mini-outlookbar-group
+{
+    border-style: solid;
+    border-width: 1px;
+}
+
+.mini-outlookbar .mini-tools-collapse
+{
+    width: 15px;
+}
+
+.mini-outlookbar .mini-outlookbar-expand .mini-tools-collapse
+{
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+}
+
+.mini-outlookbar .mini-outlookbar-collapse .mini-tools-collapse
+{
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+}
+
+/* splitter */
+.mini-splitter-border
+{
+    border-style: solid;
+    border-width: 0;
+}
+.mini-splitter-pane2 {
+    border:0
+}
+
+.mini-splitter-pane1-button, .mini-splitter-pane2-button
+{
+    height:18px;
+    margin-bottom:4px;
+    background-position: 0px -290px;
+}
+
+.mini-splitter-pane2-button
+{
+    background-position: 0px -310px;
+}
+
+.mini-layout-split-east .mini-layout-spliticon-collapse
+{
+    background-position: 0px -150px;
+}
+
+.mini-layout-split-west .mini-layout-spliticon-collapse
+{
+    background-position: 0px -210px;
+}
+
+.mini-layout-spliticon
+{
+    background-position: 0px -150px;
+}
+
+.mini-layout-split-east .mini-layout-spliticon
+{
+    background-position: 0px -210px;
+}
+
+/*----------------------------------- bgcss ----------------------------------*/
+.bg-toolbar
+{
+    background-repeat: repeat-x;
+    background-position: 0 0;
+}
+
+/*miniui图片路径重写部分*/
+.mini-feedback-add {
+  background-image: url(/PubPlatform/themes/fresh/images/dragdrop/drop-add.gif);
+}
+
+.mini-feedback-before {
+  background-image: url(/PubPlatform/themes/fresh/images/dragdrop/drop-over.gif);
+}
+
+.mini-feedback-after {
+  background-image: url(/PubPlatform/themes/fresh/images/dragdrop/drop-under.gif);
+}
+
+.mini-feedback-no {
+  background-image: url(/PubPlatform/themes/fresh/images/dragdrop/drop-no.gif);
+}
+
+.mini-feedback-yes {
+  background-image: url(/PubPlatform/themes/fresh/images/dragdrop/drop-yes.gif);
+}
+
+.mini-textboxlist-popup-loading {
+  background-image: url(/PubPlatform/themes/fresh/images/loading.gif);
+}
+
+.mini-textboxlist-popup-error {
+  background-image: url(/PubPlatform/themes/fresh/images/textboxlist/error.gif);
+}
+
+.mini-textboxlist-popup {
+    display: none;
+}
+
+/* 控件验证有效时样式 */
+.mini-control-valid
+{
+    color: #009966;
+}
+/* 控件验证无效时样式 */
+.mini-control-invalid
+{
+    color: #ff4c4c;
+}
+
+html body .mini-grid .mini-grid-cell-error
+{
+    background:#fee2f0;
+}
+.mini-errorIcon {
+  background-image: url(/PubPlatform/themes/fresh/images/textbox/error.gif);
+}

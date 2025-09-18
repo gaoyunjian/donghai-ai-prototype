@@ -1,0 +1,354 @@
+define('Mysoft.Map6.Modeling.CustomPageScript', function (require, exports, _module) {
+var $vue = window.__CODING__.Vue;
+var __PaaS_Code__ = window.__PaaS_Code__;
+var _moduleFlow = require('_module-flow')
+ // 上下文对象注入
+
+
+/*------------- 上下文对象 -------------*/
+var Context = require('$context');
+var $context = new Context({ disableMessage: false });
+//上下文对象
+var $ctx = $context.$ctx;
+var $page = $context.$page;
+var $notify = $context.$notify;
+var $util = $context.$util;
+var $_ = $context.$_;
+var $3rd = new $context.$3rd({ packages: ''});
+var $nav = $context.$nav;
+var $openAPI = $context.$openAPI
+var $tracker = $context.$tracker
+var $gpt = $context.$gpt
+
+//业务脚本
+var businessScript = { get: function(){}, $api: {}, $langs: {}, $flow: {}, $service: {} }
+// $api
+var $api = businessScript.$api || {};
+var $service = businessScript.$service || {};
+var $langs = businessScript.$langs || {};
+var $flow = businessScript.$flow || {};
+
+// 业务组件
+var businessComponent = window.seajs.require('Mysoft.Map6.Modeling.BusinessComponent');
+businessScript = businessScript || {}
+var app = {};
+
+
+        app = (function(){
+        /*------------- 屏蔽浏览器上下文对象 -------------*/var Window, window,document,setTimeout,setInterval,jQuery,$,JSON,localStorage,sessionStorage,open,opener,self,top,Vue,Mysoft,seajs,location,_utility,utility,dialog,_, require, GC;;
+
+        // 定义子模块内容
+
+        var module = {exports: {}}
+var $window = this
+module.exports = {
+  data: function () {
+    return {
+      eventKnowledge: 'skyline:designer:knowledge:open',
+      eventPlugin: 'skyline:designer:plugin:open',
+      eventMCP: 'skyline:designer:MCP:open',
+      knowledgeCallback: 'skyline:designer:knowledge:callback',
+      pluginCallback: 'skyline:designer:plugin:callback',
+      mcpCallback: 'skyline:designer:MCP:callback',
+      eventMounted: 'skyline:designer:mounted',
+      eventAiMounted: 'skyline:ai:mounted'
+    }
+  },
+  computed: {
+    pageParams: function () {
+      return $page.getParams()
+    },
+    isAgent: function () {
+      return this.pageParams.mode === 'agent'
+    }
+  },
+  created: function () {
+    var scriptDom = $window.document.createElement('script')
+    scriptDom.src = '/gptbuilder/designer/index.js?_hid' + new Date().getTime()
+    $window.document.head.appendChild(scriptDom)
+  },
+  mounted: function () {
+    this.onListener()
+  },
+  methods: {
+    initAssistant: function () {
+      try {
+        var el = $window.document.createElement('script')
+        el.type = 'module'
+        el.src = $window.location.origin + '/gptbuilder/assistant/loader.js?visible=1&t=' + Date.now()
+        var e = $window.document.getElementsByTagName('head')[0]
+        e.appendChild(el)
+      } catch (e) {
+        console.log(e)
+      }
+    },
+    emitEvent: function (name, data) {
+      var event = new CustomEvent(name, {
+        detail: data,
+        bubbles: true,
+        cancelable: true,
+      })
+      $window.document.dispatchEvent(event)
+    },
+    openKnowledge: function (e) {
+      var detail = $_.cloneDeep(e.detail)
+      var pageData = []
+      var type = 1
+      var title = '选择知识库'
+      if (Array.isArray(detail)) {
+        pageData = detail
+      } else {
+        pageData = detail.data || []
+        type = detail.type || 1
+        title = detail.title || title
+      }
+
+      var $this = this
+      $page.dialog({
+        url: '/std/42000401/08dd5fa4-8d1b-442a-8dcb-ef6fdf5dc021',
+        width: 960,
+        height: 600,
+        title: title,
+        pageData: pageData,
+        parameters: {
+          SpaceGUID: this.pageParams.space,
+          type: type
+        },
+        onclose: function (e) {
+          var selectedData = e.selectedData
+          if (selectedData && selectedData.length) {
+            var data = []
+            selectedData.forEach(function (item) {
+              var v = $_.find(pageData, function (v) {
+                return v.value === item.value
+              })
+              if (v && v.origin) {
+                data.push(v.origin)
+                return
+              }
+              data.push({
+                id: item.value,
+                name: item.text,
+                code: item.extData.Code,
+                description: item.extData.Description,
+                type: item.extData.TypeEnum
+              })
+            })
+            $this.emitEvent($this.knowledgeCallback, data)
+          }
+        }
+      })
+    },
+    openPlugin: function (e) {
+      var pageData = $_.cloneDeep(e.detail)
+      var $this = this
+      $page.dialog({
+        url: '/std/42000801/08dd5fbd-5135-4377-8813-f36153cf4f7d',
+        width: 960,
+        height: 600,
+        title: '选择插件服务',
+        pageData: pageData,
+        parameters: {
+          SpaceGUID: this.pageParams.space
+        },
+        onclose: function (e) {
+          var selectedData = e.selectedData
+          if (selectedData && selectedData.length) {
+            var data = []
+            selectedData.forEach(function (item) {
+              var v = $_.find(pageData, function (v) {
+                return v.value === item.value
+              })
+              if (v && v.origin) {
+                data.push(v.origin)
+                return
+              }
+              data.push({
+                pluginGUID: item.extData.pluginGUID,
+                toolGUID: item.extData.path,
+                toolCode: item.extData.code,
+                name: item.text,
+                path: item.extData.path,
+                inputs: item.extData.inputs,
+                outputs: item.extData.outputs,
+                description: item.extData.describe
+              })
+            })
+            $this.emitEvent($this.pluginCallback, data)
+          }
+        }
+      })
+    },
+    openMCP: function (e) {
+      var pageData = $_.cloneDeep(e.detail)
+      var $this = this
+      $page.dialog({
+        url: '/std/42000801/08ddc82d-69cf-47b1-8d6b-ff44a0c3cba4',
+        width: 960,
+        height: 600,
+        title: '选择MCP服务',
+        pageData: pageData,
+        parameters: {
+          SpaceGUID: this.pageParams.space
+        },
+        onclose: function (e) {
+          var formData = e.data.formData
+          if (formData) {
+            let data = []
+            const {
+              ResourceGUID,
+              customFiledSelectTool,
+              customSelectedToolsId,
+              customSelectdMCPName,
+              customSelectdMCPCode,
+              customSelectdMCPDescription,
+              customSelectdMCPIcon
+            } = formData
+
+            if (customFiledSelectTool === '2' || customFiledSelectTool === 2) {
+              let selectedToolsData = []
+              try {
+                selectedToolsData = $_.parseJSON(customSelectedToolsId)
+                if (selectedToolsData.length > 0) {
+                  selectedToolsData.forEach((tool) => {
+                    data.push({
+                      serviceGUID: ResourceGUID,
+                      serviceCode: customSelectdMCPCode,
+                      serviceName: customSelectdMCPName,
+                      serviceDescription: customSelectdMCPDescription,
+                      serviceIcon: customSelectdMCPIcon,
+                      toolGUID: tool.value,
+                      toolName: tool.label,
+                      toolDescription: tool.description
+                    })
+                  })
+                }
+              } catch (error) {
+                selectedToolsData = []
+              }
+            } else {
+              data.push({
+                serviceGUID: ResourceGUID,
+                serviceCode: customSelectdMCPCode,
+                serviceName: customSelectdMCPName,
+                serviceDescription: customSelectdMCPDescription,
+                serviceIcon: customSelectdMCPIcon,
+                toolGUID: null,
+                toolName: null,
+                toolDescription: null
+              })
+            }
+
+            console.log('====data', data)
+            $this.emitEvent($this.mcpCallback, data)
+          }
+        }
+      })
+    },
+    onEventMounted: function () {
+      this.initAssistant()
+    },
+    onEventAiMounted: function () {
+      if (this.isAgent) {
+        $window._gpt.open({
+          defaultSkill: this.pageParams.oid
+        })
+      }
+    },
+    onListener: function () {
+      $window.document.addEventListener(this.eventKnowledge, this.openKnowledge)
+      $window.document.addEventListener(this.eventPlugin, this.openPlugin)
+      $window.document.addEventListener(this.eventMCP, this.openMCP)
+      $window.document.addEventListener(this.eventMounted, this.onEventMounted)
+      $window.document.addEventListener(this.eventAiMounted, this.onEventAiMounted)
+    }
+  },
+  destroyed: function () {
+    $window.document.removeEventListener(this.eventKnowledge, this.openKnowledge)
+    $window.document.removeEventListener(this.eventPlugin, this.openPlugin)
+    $window.document.addEventListener(this.eventMCP, this.openMCP)
+    $window.document.removeEventListener(this.eventMounted, this.onEventMounted)
+    $window.document.removeEventListener(this.eventAiMounted, this.onEventAiMounted)
+  }
+}
+        ;return module.exports;
+
+        })();
+        
+var vendorComponents = [];
+app.components = {};
+if(__PaaS_Code__) {app.components = __PaaS_Code__.getVendorComponents(vendorComponents)}
+var componentsConfig = {}
+// 修改refs
+var coding = require('$coding');
+app.mixins = [coding.proxyCompRefs(componentsConfig)]
+app.computed = app.computed || {};
+app.computed.$langs = function() {
+    return $langs;
+};
+app.el = '#app';
+
+_moduleFlow.onReadyWizard(function(){
+    var appVue = new $vue(app);
+    var $pageRefresh = require('$page-refresh')
+    var $pageResize = require('$page-resize')
+
+    // TJFD-75 支持页面 resize 事件
+    $pageResize.onWindowResize(function () {
+        var onPageResize = app['onPageResize']
+        if (onPageResize && typeof onPageResize === 'function') return onPageResize.apply(appVue, arguments)
+    })
+
+    $pageRefresh.registerPage(function () {
+        var refreshFn = app['refreshData']
+        if (refreshFn && typeof refreshFn === 'function') return refreshFn.apply(appVue, arguments)
+    })
+})
+});
+
+define('Mysoft.Map6.Modeling.VueTemplateComponent', function (require, exports, _module) {
+    var $vue = window.__CODING__.Vue;
+    $vue._alreadyRegisterComponents = {};
+    // 上下文对象注入
+
+
+/*------------- 上下文对象 -------------*/
+var Context = require('$context');
+var $context = new Context({ disableMessage: false });
+//上下文对象
+var $ctx = $context.$ctx;
+var $page = $context.$page;
+var $notify = $context.$notify;
+var $util = $context.$util;
+var $_ = $context.$_;
+var $3rd = new $context.$3rd({ packages: ''});
+var $nav = $context.$nav;
+var $openAPI = $context.$openAPI
+var $tracker = $context.$tracker
+var $gpt = $context.$gpt
+
+    // 在线编码工具库
+    var coding = require('$coding');
+    var businessComponentContext = require('$business-component-context');
+    //业务脚本
+    var businessScript = { get: function () {}};
+    var $api = null;
+    var $service = null;
+    var $flow = null;
+    var $langs = {};
+    var businessComponents = {};
+
+    var __initBusinessScript = function () {
+        if (businessScript.required) return;
+        businessScript = require('Mysoft.Map6.Modeling.BusinessScript');
+        $api = businessScript.$api
+        $service = businessScript.$service;
+        $flow = businessScript.$flow
+        $langs = businessScript.$langs || {}
+    };
+
+    var controlHtml = {}; // 业务组件大控件模板
+    var vueTemplateComponent = {}
+// 遍历所有的组件
+_module.exports = vueTemplateComponent;
+})

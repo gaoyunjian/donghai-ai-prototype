@@ -1,0 +1,456 @@
+@charset "utf-8";
+/*
+* 公用样式，样式重置、公用规则、MiniUI 样式修正等最常用的样式
+* 适用范围: 所有页面
+*/
+
+/********** CSS reset **********/
+/* 清除内外边距、边框 */
+@charset "utf-8";
+html, body, div, span, applet, object, iframe, h1, h2, h3,
+h4, h5, h6, p, blockquote, pre, a, abbr, acronym,
+address, big, cite, code, del, dfn, em, font, img, ins,
+kbd, q, s, samp, small, strike, strong, sub, sup, tt,
+var, dl, dt, dd, ol, ul, li, fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td {
+    margin: 0;
+    padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: normal;
+    font-size: 14px;
+}
+/* 去掉默认的边框 */
+fieldset, img {
+    border: 0;
+}
+/* 将斜体扶正 */
+address, cite, dfn, em, var {
+    font-style: normal;
+}
+/** 设置默认字体 **/
+body, table, tr, td, input, textarea {
+    font-family: "Microsoft Yahei", Verdana, simsun, Arial, Helvetica, sans-serif;
+}
+/** 设置字体大小 **/
+body {
+    font-size: 14px;
+    /*line-height: normal;*/
+}
+
+    body.cursor-move {
+        cursor: move !important;
+    }
+
+    body.dragging {
+        overflow: hidden;
+        cursor: move !important;
+    }
+/* 统一等宽字体 */
+code, kbd, pre, samp {
+    font-family: courier new, courier, monospace;
+}
+/* 小于 12px 的中文很难阅读，让 small 正常化 */
+small {
+    font-size: 12px;
+}
+/* 使得表单元素在 ie 下能继承 body 的字体大小 */
+button, input, textarea, select {
+    font-size: 100%;
+}
+/** 重置列表元素 **/
+ol, ul, li {
+    list-style: none;
+}
+/** 重置表格元素 **/
+table {
+    border-spacing: 0;
+}
+/** 默认不显示下划线，保持页面简洁 **/
+a {
+    text-decoration: none;
+}
+    /** 让链接在 hover 状态下显示下划线 **/
+    a:hover {
+        text-decoration: underline;
+    }
+/* for ie6 */
+legend {
+    color: #000;
+}
+
+.no-scroll {
+    overflow: hidden;
+}
+/* IE6/7 默认有垂直滚动条，这里统一表现 */
+html {
+    +overflow: auto;
+}
+
+input[type="checkbox"] {
+    vertical-align: text-top;
+}
+
+/********** 通用类 **********/
+/*动画*/
+.miniux-animate,
+.ms-pager-item,
+.miniux-pager-size,
+.ms-pager-inbox {
+    -moz-transition: all 0.3s;
+    -o-transition: all 0.3s;
+    -webkit-transition: all 0.3s;
+    transition: all 0.3s;
+}
+/* InlineBlock 外层元素应用该样式可去除间隙 */
+.map-inline-block-outer {
+    +word-spacing: -1px;
+    font-size: 0;
+    /* IE6、7 */
+    /* 所有浏览器 */
+}
+
+    .map-inline-block-outer .map-inline-block {
+        vertical-align: top;
+        word-spacing: normal;
+        letter-spacing: normal;
+        font-size: 12px;
+    }
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    /* firefox 中 letter-spacing 会导致脱离普通流的元素水平位移 */
+    .map-inline-block-outer {
+        letter-spacing: -5px; /* Safari 等不支持字体大小为 0 的浏览器, N 根据父级字体调节*/
+    }
+}
+
+.map-inline-block {
+    +display: inline;
+    +zoom: 1;
+    display: inline-block;
+}
+/* 编程字体 */
+.map-code {
+    font-family: courier new, courier, monospace;
+}
+/* 固定宽度表格 */
+.map-fixed-table {
+    table-layout: fixed;
+    -ms-word-break: break-all;
+    -moz-word-break: break-all;
+    -o-word-break: break-all;
+    word-break: break-all;
+    /*word-wrap: break-word;*/
+}
+
+/* Width 100 Percent */
+.map-w100p {
+    width: 100%;
+}
+/* 父容器含有纵向滚动条时使用 */
+.map-w100ps {
+    +width: expression(parentNode.clientWidth);
+    width: 100%;
+    /* IE6/7 100% 包含了父容器滚动条，特此修正 */
+}
+/* Height 100 Percent */
+.map-h100p {
+    height: 100%;
+}
+/* 父容器含有横向滚动条时使用 */
+.map-h100ps {
+    +height: expression(parentNode.clientHeight);
+    height: 100%;
+    /* IE6/7 100% 包含了父容器滚动条，特此修正 */
+}
+/* 最小高度 */
+.min-w80px {
+    min-width: 80px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+/* 充满整个文档尺寸 */
+.map-full-size {
+    position: fixed;
+    _position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    _width: expression(document.documentElement.offsetWidth + 'px');
+    height: 100%;
+    _height: expression(document.documentElement.offsetHeight + 'px');
+}
+/* 单元格不换行，超出部分用省略号代替 （表格需设置 FixedTable） */
+.map-ellipsis {
+    overflow: hidden;
+    -moz-text-overflow: ellipsis;
+    -ms-text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.map-nowrap {
+    white-space: nowrap;
+}
+/* 清除浮动 */
+.map-clear:after {
+    display: block;
+    visibility: hidden;
+    clear: both;
+    height: 0;
+    content: "";
+}
+
+.map-clear {
+    *zoom: 1;
+}
+/* 清除浮动，原始版本 */
+.map-clear-both {
+    float: none;
+    clear: both;
+    margin: 0;
+}
+/* 隐藏, 通常用来与 JS 配合 */
+.map-hide {
+    display: none;
+}
+
+.map-hide-important {
+    display: none !important;
+}
+
+/* IE6 不支持 position:fixed;，这里统一 */
+.map-fixed-top, .map-fixed-right, .map-fixed-bottom, .map-fixed-left {
+    position: fixed;
+    _position: absolute;
+    /* hack for ie6 */
+}
+/* 相当于正常的 position:fixed; top:0; */
+.map-fixed-top {
+    top: 0;
+    _top: expression(eval(document.documentElement.scrollTop));
+    bottom: auto;
+    _bottom: auto;
+}
+/* 相当于正常的 position:fixed;bottom:0px; */
+.map-fixed-bottom {
+    top: auto;
+    _top: expression(eval(document.documentElement.scrollTop+document.documentElement.clientHeight-this.offsetHeight-(parseInt(this.currentStyle.marginTop,10)||0)-(parseInt(this.currentStyle.marginBottom,10)||0)));
+    bottom: 0;
+    _bottom: auto;
+}
+/* 相当于正常的 position:fixed;left:0px; */
+.map-fixed-left {
+    _position: absolute;
+    right: auto;
+    left: 0;
+    _left: expression(eval(document.documentElement.scrollLeft));
+}
+/* 相当于正常的 position:fixed;right:0; */
+.map-fixed-right {
+    right: 0;
+    _right: auto;
+    left: auto;
+    _left: expression(eval(document.documentElement.scrollLeft+document.documentElement.clientWidth-this.offsetWidth)-(parseInt(this.currentStyle.marginLeft,10)||0)-(parseInt(this.currentStyle.marginRight,10)||0));
+}
+/* 小箭头，设置大小在 style 里添加 border-width */
+.map-arrow-up, .map-arrow-down, .map-arrow-right, .map-arrow-left {
+    width: 0;
+    height: 0;
+    line-height: 0;
+    _filter: chroma(color=tomato);
+}
+
+.map-arrow-up, .map-arrow-down {
+    border-right: 5px solid transparent;
+    _border-right: 5px solid tomato;
+    border-left: 5px solid transparent;
+    _border-left: 5px solid tomato;
+}
+
+.map-arrow-up {
+    border-bottom: 5px solid #000;
+}
+
+.map-arrow-down {
+    border-top: 5px solid #000;
+}
+
+.map-arrow-right, .map-arrow-left {
+    border-top: 5px solid transparent;
+    _border-top: 5px solid tomato;
+    border-bottom: 5px solid transparent;
+    _border-bottom: 5px solid tomato;
+}
+
+.map-arrow-right {
+    border-left: 5px solid #000000;
+}
+
+.map-arrow-left {
+    border-right: 5px solid #000000;
+}
+
+/* 平台图标通用类 */
+.map-icon {
+    +display: inline;
+    +zoom: 1;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-color: transparent;
+    background-position: center center;
+    background-repeat: no-repeat;
+    vertical-align: middle;
+    /* IE6、7 */
+    /* IE6、7 */
+}
+
+/* 非mini控件通用样式 */
+.ms-disabled {
+    color: #ddd;
+    cursor: default;
+}
+
+.popup-description {
+    color: #8d8d8d;
+}
+
+/* ms resizer */
+.ms-resizer {
+    position: absolute;
+    right: 2px;
+    bottom: 5px;
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
+    cursor: se-resize;
+}
+
+/* 分页样式 */
+.ms-pager {
+    float: right;
+}
+
+    .ms-pager span {
+        display: inline-block;
+        padding: 3px 10px;
+        font-size: 12px;
+    }
+
+    .ms-pager-total .miniux-pager-size,
+    .ms-pager .ms-pager-inbox {
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+        margin: 0 10px;
+        padding: 0 3px;
+        width: 50px;
+        height: 20px;
+        border: 1px solid #c9c9c9;
+        background: #fff;
+        font-size: 12px;
+    }
+
+        .ms-pager-total .miniux-pager-size:focus,
+        .ms-pager .ms-pager-inbox:focus {
+            outline: none;
+            border: 1px solid #0077cb;
+        }
+
+.ms-pager-total {
+    float: left;
+    height: 33px;
+    font-size: 12px;
+    line-height: 33px;
+}
+
+    .ms-pager-total span {
+        color: #0077cc;
+    }
+
+    .ms-pager-total .page_tip {
+        color: #000;
+    }
+
+.ms-pager-item:link,
+.ms-pager-item:visited,
+.ms-pager-item:active,
+.ms-pager-next,
+.ms-pager-next:visited,
+.ms-pager-next:active,
+.ms-pager-prev,
+.ms-pager-prev:visited,
+.ms-pager-prev:active {
+    display: inline-block;
+    margin: 5px 6px;
+    padding: 0 7px;
+    border: 1px solid transparent;
+    color: #333;
+    text-decoration: none;
+    font-size: 12px;
+}
+
+    .ms-pager-next:active,
+    .ms-pager-next:active,
+    .ms-pager-next {
+        margin-right: 5px;
+        margin-left: 0;
+        padding-left: 0;
+    }
+
+    .ms-pager-prev:visited,
+    .ms-pager-prev:active,
+    .ms-pager-prev {
+        margin-right: 0;
+        margin-left: 5px;
+        padding-right: 0;
+        padding-left: 0;
+    }
+
+      .ms-pager-next .ms-icon-next, .ms-pager-prev .ms-icon-prev {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        background: url(/PubPlatform/themes/fresh/images/classic-icon.png) 5px -25px;
+      }
+
+        .ms-pager-prev .ms-icon-prev {
+            background-position: -200px -1px;
+        }
+
+    .ms-pager-next .ms-icon-next {
+        background-position: -225px -1px;
+    }
+
+    .ms-pager-prev.ms-pager-disabled .ms-icon-prev {
+        background-position: -150px -1px;
+    }
+
+    .ms-pager-next.ms-pager-disabled .ms-icon-next {
+        background-position: -175px -1px;
+    }
+
+.ms-pager .ms-pager-item.ms-pager-item-actived {
+    border: 1px solid #0076cd;
+    background-color: #0076cd;
+    border-radius: 2px;
+    color: #fff;
+    text-decoration: none;
+}
+
+.ms-pager-item:hover {
+    border: 1px solid #e4e4e4;
+    background-color: #eaf7ff;
+    color: #333;
+    text-decoration: none;
+}
+
+.ms-pager-disabled {
+    cursor: default;
+}
+

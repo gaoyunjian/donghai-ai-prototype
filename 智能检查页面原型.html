@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI智能助手 - 采购风控审核系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: #fff;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .ai-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .header h1 {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            margin-right: 8px;
+        }
+
+        .mode-tag {
+            background: #f0f0f0;
+            color: #666;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .close-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: #999;
+        }
+
+        .try-btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-right: 16px;
+        }
+
+        .status-section {
+            padding: 20px;
+            background: #fff;
+        }
+
+        .ai-result {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .ai-result-label {
+            font-size: 16px;
+            color: #333;
+            margin-right: 8px;
+        }
+
+        .status-fail {
+            color: #ff4d4f;
+            font-weight: 500;
+            font-size: 16px;
+        }
+
+        .toggle-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .toggle-label {
+            font-size: 14px;
+            color: #666;
+            display: flex;
+            align-items: center;
+        }
+
+        .toggle-count {
+            background: #f5f5f5;
+            color: #999;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .toggle-switch {
+            width: 44px;
+            height: 24px;
+            background: #00b96b;
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            right: 2px;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .check-items {
+            padding: 0 20px;
+        }
+
+        .check-item {
+            padding: 16px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .check-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-header {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .error-icon {
+            width: 20px;
+            height: 20px;
+            background: #ff4d4f;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .error-icon::after {
+            content: '!';
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .item-title {
+            font-size: 15px;
+            color: #333;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .item-description {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .risk-points {
+            background: #fff2f0;
+            border: 1px solid #ffccc7;
+            border-radius: 6px;
+            padding: 12px;
+        }
+
+        .risk-points-title {
+            font-size: 13px;
+            color: #cf1322;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .risk-list {
+            list-style: none;
+        }
+
+        .risk-list li {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 4px;
+            padding-left: 8px;
+            position: relative;
+        }
+
+        .risk-list li::before {
+            content: '•';
+            color: #ff4d4f;
+            position: absolute;
+            left: 0;
+        }
+
+        .actions {
+            padding: 20px;
+            background: #fff;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .btn-accept {
+            background: #1890ff;
+            color: white;
+        }
+
+        .btn-accept:hover {
+            background: #40a9ff;
+        }
+
+        .btn-reject {
+            background: #fff;
+            color: #666;
+            border: 1px solid #d9d9d9;
+        }
+
+        .btn-reject:hover {
+            color: #1890ff;
+            border-color: #1890ff;
+        }
+
+        .expandable {
+            cursor: pointer;
+        }
+
+        .expandable:hover {
+            background: #fafafa;
+        }
+
+        .collapsed .risk-points {
+            display: none;
+        }
+
+        .expand-icon {
+            margin-left: auto;
+            transition: transform 0.3s;
+            color: #999;
+            font-size: 12px;
+        }
+
+        .collapsed .expand-icon {
+            transform: rotate(-90deg);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 页面头部 -->
+        <div class="header">
+            <h1>智能检查</h1>
+        </div>
+
+        <!-- AI检查结果状态 -->
+        <div class="status-section">
+            <div class="ai-result">
+                <span class="ai-result-label">AI检查结果:</span>
+                <span class="status-fail">不通过</span>
+            </div>
+            
+            <div class="toggle-section">
+                <div class="toggle-label">
+                    只显示风险项
+                    <span class="toggle-count">(1)</span>
+                </div>
+                <div class="toggle-switch" onclick="toggleRiskOnly(this)"></div>
+            </div>
+        </div>
+
+        <!-- 检查项目列表 -->
+        <div class="check-items">
+            <!-- 检查项目1 -->
+            <div class="check-item expandable" onclick="toggleExpand(this)">
+                <div class="item-header">
+                    <div class="error-icon"></div>
+                    <div class="item-title">不允许输入人存在中性词的情况</div>
+                    <div class="expand-icon">▼</div>
+                </div>
+                <div class="item-description">
+                    合同中的人员信息存在中性词的情况。
+                </div>
+                <div class="risk-points">
+                    <div class="risk-points-title">风险点:</div>
+                    <ul class="risk-list">
+                        <li>【深圳市明源云科技有限公司】&【深圳明源云科技有限公司北京分公司】4处标识存在中性词中性词，第4页【北京分公司】中性词</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 检查项目2 -->
+            <div class="check-item expandable" onclick="toggleExpand(this)">
+                <div class="item-header">
+                    <div class="error-icon"></div>
+                    <div class="item-title">投标人关联信息</div>
+                    <div class="expand-icon">▼</div>
+                </div>
+                <div class="item-description">
+                    合同中的人员信息存在中性词的情况。
+                </div>
+                <div class="risk-points">
+                    <div class="risk-points-title">风险点:</div>
+                    <ul class="risk-list">
+                        <li>【深圳市明源云科技有限公司】&【深圳明源云科技有限公司】中性词，第4页【北京分公司】中性词，第4页【1310101532】中性词</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 检查项目3 -->
+            <div class="check-item expandable" onclick="toggleExpand(this)">
+                <div class="item-header">
+                    <div class="error-icon"></div>
+                    <div class="item-title">不允许输入人存在中性词相关信息</div>
+                    <div class="expand-icon">▼</div>
+                </div>
+                <div class="item-description">
+                    合同中的人员信息存在中性词的情况。
+                </div>
+                <div class="risk-points">
+                    <div class="risk-points-title">风险点:</div>
+                    <ul class="risk-list">
+                        <li>【深圳市明源云科技有限公司】&【深圳明源云科技有限公司】中性词，第4页【1310101532】中性词</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部操作按钮 -->
+        <div class="actions">
+            <button class="btn btn-accept" onclick="handleAccept()">接受</button>
+            <button class="btn btn-reject" onclick="handleReject()">不接受</button>
+        </div>
+    </div>
+
+    <script>
+        // 切换风险项显示
+        function toggleRiskOnly(element) {
+            element.classList.toggle('active');
+            // 这里可以添加筛选逻辑
+            console.log('切换风险项显示');
+        }
+
+        // 展开/收起检查项详情
+        function toggleExpand(element) {
+            element.classList.toggle('collapsed');
+        }
+
+        // 处理接受操作
+        function handleAccept() {
+            alert('已接受检查结果');
+            console.log('用户接受了检查结果');
+        }
+
+        // 处理不接受操作
+        function handleReject() {
+            alert('已拒绝检查结果');
+            console.log('用户拒绝了检查结果');
+        }
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('智能检查页面已加载');
+            
+            // 可以在这里添加更多初始化逻辑
+            // 比如从API获取检查结果数据等
+        });
+    </script>
+</body>
+</html>

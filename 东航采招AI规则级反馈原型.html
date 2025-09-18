@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>规则级反馈交互演示 (最终修复版)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+            background-color: #f5f7fa; 
+            padding: 20px; 
+            line-height: 1.6; 
+        }
+        .container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            background: white; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); 
+            overflow: hidden; 
+        }
+        .header { 
+            background: #4a90e2; 
+            color: white; 
+            padding: 20px 24px; 
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header-icon {
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #4a90e2;
+        }
+        .header h1 { 
+            font-size: 18px; 
+            font-weight: 600; 
+            margin: 0;
+        }
+        .demo-section { 
+            padding: 24px; 
+        }
+        .demo-info {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #666;
+            border-left: 4px solid #4a90e2;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-icon {
+            width: 20px;
+            height: 20px;
+            background: #4a90e2;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+        .rule-item { 
+            background: #fff; 
+            border: 1px solid #e9ecef; 
+            border-radius: 6px; 
+            padding: 0; 
+            margin-bottom: 12px; 
+            position: relative;
+        }
+        
+        .rule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            background: #fafbfc;
+        }
+        
+        .rule-title { 
+            font-size: 14px; 
+            font-weight: 600; 
+            color: #333; 
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+        
+        .collapse-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            color: #666;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .collapse-btn:hover {
+            background: #e9ecef;
+            color: #333;
+        }
+        
+        .rule-body {
+            padding: 16px 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .rule-item.collapsed .rule-body {
+            display: none;
+        }
+        
+        .rule-description-section {
+            margin-bottom: 16px;
+        }
+        
+        .rule-description { 
+            color: #666; 
+            font-size: 13px; 
+            line-height: 1.5; 
+            margin-bottom: 16px;
+        }
+        
+        .risk-points-section {
+            margin-bottom: 20px;
+        }
+        
+        .risk-points {
+            background: #fff8f0;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 12px;
+            color: #333;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        
+        .risk-points strong {
+            color: #e17055;
+        }
+        
+        .rule-status-icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+        }
+        .rule-status-icon.error {
+            background: #dc3545;
+        }
+        .rule-status-icon.warning {
+            background: #ffc107;
+            color: #333;
+        }
+        .rule-status-icon.success {
+            background: #28a745;
+        }
+        
+        .feedback-area { 
+            display: flex; 
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px; 
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
+        }
+        .feedback-buttons { 
+            display: flex; 
+            gap: 8px; 
+        }
+        .feedback-btn { 
+            padding: 4px 12px; 
+            border: 1px solid #f0f0f0; 
+            background: transparent; 
+            border-radius: 3px; 
+            cursor: pointer; 
+            font-size: 11px; 
+            transition: all 0.2s ease; 
+            color: #999;
+            min-width: 50px;
+            text-align: center;
+            opacity: 0.7;
+        }
+        .feedback-btn:hover { 
+            border-color: #ddd; 
+            background: #fafafa; 
+            opacity: 1;
+        }
+        .feedback-btn.accept { 
+            border-color: #e8f5e8; 
+            color: #6c757d; 
+        }
+        .feedback-btn.accept:hover { 
+            background: #f8fff8; 
+            color: #28a745;
+            border-color: #c3e6cb;
+        }
+        .feedback-btn.reject { 
+            border-color: #fce8e8; 
+            color: #6c757d; 
+        }
+        .feedback-btn.reject:hover { 
+            background: #fffafa; 
+            color: #dc3545;
+            border-color: #f5c6cb;
+        }
+        .feedback-status { 
+            display: none; 
+            align-items: center; 
+            gap: 4px; 
+            padding: 4px 10px; 
+            border-radius: 3px; 
+            font-size: 11px; 
+            font-weight: 400; 
+            cursor: pointer; 
+            position: relative;
+            min-width: 70px;
+            justify-content: center;
+            opacity: 0.8;
+        }
+        .feedback-status.accepted { 
+            background: #f8fff8; 
+            color: #6c757d; 
+            border: 1px solid #e8f5e8; 
+        }
+        .feedback-status.rejected { 
+            background: #fffafa; 
+            color: #6c757d; 
+            border: 1px solid #fce8e8; 
+        }
+        .feedback-status:hover { 
+            opacity: 1; 
+            background: #f5f5f5;
+        }
+        .popover { 
+            display: none; 
+            position: absolute; 
+            background: white; 
+            border: 1px solid #e0e0e0; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); 
+            z-index: 200; 
+            min-width: 320px; 
+            max-width: 400px; 
+        }
+        .popover-header { 
+            padding: 16px 20px 12px; 
+            font-size: 16px; 
+            font-weight: 600; 
+            color: #333; 
+            border-bottom: 1px solid #f0f0f0; 
+        }
+        .popover-content { 
+            padding: 16px 20px; 
+        }
+        .preset-tabs { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 8px; 
+            margin-bottom: 16px; 
+        }
+        .preset-tab { 
+            padding: 6px 12px; 
+            background: #f5f5f5; 
+            border: 1px solid #e0e0e0; 
+            border-radius: 16px; 
+            font-size: 13px; 
+            color: #666; 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            user-select: none; 
+        }
+        .preset-tab:hover { 
+            background: #e8f4fd; 
+            border-color: #1976d2; 
+            color: #1976d2; 
+        }
+        .preset-tab.selected { 
+            background: #1976d2; 
+            border-color: #1976d2; 
+            color: white; 
+        }
+        .custom-input-section { 
+            margin-top: 16px; 
+        }
+        .custom-input-label { 
+            display: block; 
+            font-size: 13px; 
+            color: #666; 
+            margin-bottom: 8px; 
+        }
+        .popover-actions { 
+            padding: 12px 20px 16px; 
+            display: flex; 
+            gap: 12px; 
+            justify-content: flex-end; 
+            border-top: 1px solid #f0f0f0; 
+        }
+        .popover-btn { 
+            padding: 8px 16px; 
+            border: none; 
+            border-radius: 4px; 
+            font-size: 14px; 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+        }
+        .popover-btn.secondary { 
+            background: #f5f5f5; 
+            color: #666; 
+        }
+        .popover-btn.secondary:hover { 
+            background: #e0e0e0; 
+        }
+        .popover-btn.primary { 
+            background: #1976d2; 
+            color: white; 
+        }
+        .popover-btn.primary:hover { 
+            background: #1565c0; 
+        }
+        .reason-input { 
+            width: 100%; 
+            min-height: 60px; 
+            padding: 8px 12px; 
+            border: 1px solid #dee2e6; 
+            border-radius: 6px; 
+            font-size: 13px; 
+            resize: vertical; 
+            font-family: inherit; 
+        }
+        .reason-input:focus { 
+            outline: none; 
+            border-color: #80bdff; 
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); 
+        }
+        .tooltip { 
+            position: absolute; 
+            background: #2c3e50; 
+            color: white; 
+            padding: 12px 16px; 
+            border-radius: 6px; 
+            font-size: 13px; 
+            max-width: 300px; 
+            z-index: 200; 
+            opacity: 0; 
+            visibility: hidden; 
+            transition: all 0.2s ease; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); 
+        }
+        .tooltip::after { 
+            content: ''; 
+            position: absolute; 
+            top: 100%; 
+            left: 20px; 
+            border: 6px solid transparent; 
+            border-top-color: #2c3e50; 
+        }
+        .tooltip.show { 
+            opacity: 1; 
+            visibility: visible; 
+        }
+        .tooltip-content { 
+            margin-bottom: 8px; 
+        }
+        .tooltip-actions { 
+            text-align: right; 
+        }
+        .edit-btn { 
+            background: none; 
+            border: none; 
+            color: #ffc107; 
+            cursor: pointer; 
+            font-size: 12px; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            transition: background 0.2s ease; 
+        }
+        .edit-btn:hover { 
+            background: rgba(255, 193, 7, 0.1); 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-icon">🤖</div>
+            <h1>智能检查</h1>
+        </div>
+        <div class="demo-section">
+            <div class="demo-info">
+                <strong>AI检查结果：不通过</strong>
+            </div>
+            
+            <div class="section-title">
+                <div class="section-icon">▼</div>
+                IP雷同性检查
+            </div>
+            
+            <div class="rule-item" data-rule-id="rule-1">
+                <div class="rule-header">
+                    <div class="rule-title">
+                        <div class="rule-status-icon error">●</div>
+                        不同投标人存在IP相同的情况
+                    </div>
+                    <button class="collapse-btn" onclick="toggleCollapse('rule-1')">▼</button>
+                </div>
+                <div class="rule-body">
+                    <div class="rule-description-section">
+                        <div class="rule-description">
+                            检查投标人是否存在IP相同的情况。
+                        </div>
+                    </div>
+                    <div class="risk-points-section">
+                        <div class="risk-points">
+                            <strong>风险点：</strong>
+                            <br>
+                            • 【深圳市明源云科技有限公司】&【深圳市明源云科技有限公司北京分公司】在招标过程中出现IP地址相似/相同的情况，请在【操作日志分析】中查看详情。
+                        </div>
+                    </div>
+                    <div class="feedback-area">
+                        <div class="feedback-buttons">
+                            <button class="feedback-btn accept" onclick="acceptRule('rule-1')">接受</button>
+                            <button class="feedback-btn reject" onclick="rejectRule('rule-1', event)">不接受</button>
+                        </div>
+                        <div class="feedback-status accepted" onclick="resetFeedback('rule-1')">
+                            <span>✅ 已接受</span>
+                        </div>
+                        <div class="feedback-status rejected" onclick="resetFeedback('rule-1')" onmouseenter="showTooltip(event, 'rule-1')" onmouseleave="scheduleHideTooltip()">
+                            <span>❌ 已拒绝</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title">
+                <div class="section-icon">▼</div>
+                投标人关系检查
+            </div>
+            
+            <div class="rule-item" data-rule-id="rule-2">
+                <div class="rule-header">
+                    <div class="rule-title">
+                        <div class="rule-status-icon error">●</div>
+                        不同投标人存在相同注册电话
+                    </div>
+                    <button class="collapse-btn" onclick="toggleCollapse('rule-2')">▼</button>
+                </div>
+                <div class="rule-body">
+                    <div class="rule-description-section">
+                        <div class="rule-description">
+                            检查投标人是否存在相同注册电话的情况。
+                        </div>
+                    </div>
+                    <div class="risk-points-section">
+                        <div class="risk-points">
+                            <strong>风险点：</strong>
+                            <br>
+                            • "深圳市明源云科技有限公司北京分公司"与"深圳市明源云科技有限公司"的注册电话"18310991532"重复
+                        </div>
+                    </div>
+                    <div class="feedback-area">
+                        <div class="feedback-buttons">
+                            <button class="feedback-btn accept" onclick="acceptRule('rule-2')">接受</button>
+                            <button class="feedback-btn reject" onclick="rejectRule('rule-2', event)">不接受</button>
+                        </div>
+                        <div class="feedback-status accepted" onclick="resetFeedback('rule-2')">
+                            <span>✅ 已接受</span>
+                        </div>
+                        <div class="feedback-status rejected" onclick="resetFeedback('rule-2')" onmouseenter="showTooltip(event, 'rule-2')" onmouseleave="scheduleHideTooltip()">
+                            <span>❌ 已拒绝</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rule-item" data-rule-id="rule-3">
+                <div class="rule-header">
+                    <div class="rule-title">
+                        <div class="rule-status-icon error">●</div>
+                        不同投标人存在相同注册邮箱
+                    </div>
+                    <button class="collapse-btn" onclick="toggleCollapse('rule-3')">▼</button>
+                </div>
+                <div class="rule-body">
+                    <div class="rule-description-section">
+                        <div class="rule-description">
+                            检查投标人是否存在相同注册邮箱的情况。
+                        </div>
+                    </div>
+                    <div class="risk-points-section">
+                        <div class="risk-points">
+                            <strong>风险点：</strong>
+                            <br>
+                            • "深圳市明源云科技有限公司北京分公司"与"深圳市明源云科技有限公司"的注册邮箱"103384352@qq.com"重复
+                        </div>
+                    </div>
+                    <div class="feedback-area">
+                        <div class="feedback-buttons">
+                            <button class="feedback-btn accept" onclick="acceptRule('rule-3')">接受</button>
+                            <button class="feedback-btn reject" onclick="rejectRule('rule-3', event)">不接受</button>
+                        </div>
+                        <div class="feedback-status accepted" onclick="resetFeedback('rule-3')">
+                            <span>✅ 已接受</span>
+                        </div>
+                        <div class="feedback-status rejected" onclick="resetFeedback('rule-3')" onmouseenter="showTooltip(event, 'rule-3')" onmouseleave="scheduleHideTooltip()">
+                            <span>❌ 已拒绝</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title">
+                <div class="section-icon">▼</div>
+                财务规则
+            </div>
+            
+            <div class="rule-item" data-rule-id="rule-4">
+                <div class="rule-header">
+                    <div class="rule-title">
+                        <div class="rule-status-icon error">●</div>
+                        首付比例审查
+                    </div>
+                    <button class="collapse-btn" onclick="toggleCollapse('rule-4')">▼</button>
+                </div>
+                <div class="rule-body">
+                    <div class="rule-description-section">
+                        <div class="rule-description">
+                            合同中的首付比例不得低于工程款总金额的30%。
+                        </div>
+                    </div>
+                    <div class="risk-points-section">
+                        <div class="risk-points">
+                            <strong>风险点：</strong>
+                            <br>
+                            • 首付比例为15%，低于规定的30%最低要求，不符合规范标准。需修改付款条件以提高首付比例至30%或以上。
+                        </div>
+                    </div>
+                    <div class="feedback-area">
+                        <div class="feedback-buttons">
+                            <button class="feedback-btn accept" onclick="acceptRule('rule-4')">接受</button>
+                            <button class="feedback-btn reject" onclick="rejectRule('rule-4', event)">不接受</button>
+                        </div>
+                        <div class="feedback-status accepted" onclick="resetFeedback('rule-4')">
+                            <span>✅ 已接受</span>
+                        </div>
+                        <div class="feedback-status rejected" onclick="resetFeedback('rule-4')" onmouseenter="showTooltip(event, 'rule-4')" onmouseleave="scheduleHideTooltip()">
+                            <span>❌ 已拒绝</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rule-item" data-rule-id="rule-5">
+                <div class="rule-header">
+                    <div class="rule-title">
+                        <div class="rule-status-icon success">●</div>
+                        金额字段校验
+                    </div>
+                    <button class="collapse-btn" onclick="toggleCollapse('rule-5')">▼</button>
+                </div>
+                <div class="rule-body">
+                    <div class="rule-description-section">
+                        <div class="rule-description">
+                            合同中的金额必须字段必须为数字，且大于0。
+                        </div>
+                    </div>
+                    <div class="feedback-area">
+                        <div class="feedback-buttons">
+                            <button class="feedback-btn accept" onclick="acceptRule('rule-5')">接受</button>
+                            <button class="feedback-btn reject" onclick="rejectRule('rule-5', event)">不接受</button>
+                        </div>
+                        <div class="feedback-status accepted" onclick="resetFeedback('rule-5')">
+                            <span>✅ 已接受</span>
+                        </div>
+                        <div class="feedback-status rejected" onclick="resetFeedback('rule-5')" onmouseenter="showTooltip(event, 'rule-5')" onmouseleave="scheduleHideTooltip()">
+                            <span>❌ 已拒绝</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title">
+                <div class="section-icon">▼</div>
+                条款规则
+            </div>
+            
+            <div class="rule-item" data-rule-id="rule-6">
+                <div class="rule-header">
+                    <div class="rule-title">
+                        <div class="rule-status-icon error">●</div>
+                        违约责任条款审查
+                    </div>
+                    <button class="collapse-btn" onclick="toggleCollapse('rule-6')">▼</button>
+                </div>
+                <div class="rule-body">
+                    <div class="rule-description-section">
+                        <div class="rule-description">
+                            合同必须包含违约责任条款，明确责任和违约金计算方式。
+                        </div>
+                    </div>
+                    <div class="risk-points-section">
+                        <div class="risk-points">
+                            <strong>风险点：</strong>
+                            <br>
+                            • 合同条款"违约责任"条款，但缺乏分类违约金计算方式不合理或不明确：1. 乙方单方面违约中方期限金额，缺乏客观标准；2. 精神损失费 10万元无法律依据；3. 违约金比例高达总款额30%，可能超出法定合理范围，建议根据《民法典》调整为合理，对等的违约责任约定。
+                        </div>
+                    </div>
+                    <div class="feedback-area">
+                        <div class="feedback-buttons">
+                            <button class="feedback-btn accept" onclick="acceptRule('rule-6')">接受</button>
+                            <button class="feedback-btn reject" onclick="rejectRule('rule-6', event)">不接受</button>
+                        </div>
+                        <div class="feedback-status accepted" onclick="resetFeedback('rule-6')">
+                            <span>✅ 已接受</span>
+                        </div>
+                        <div class="feedback-status rejected" onclick="resetFeedback('rule-6')" onmouseenter="showTooltip(event, 'rule-6')" onmouseleave="scheduleHideTooltip()">
+                            <span>❌ 已拒绝</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="popover" id="rejectPopover">
+        <div class="popover-header">请说明不接受的原因</div>
+        <div class="popover-content">
+            <div class="preset-tabs">
+                <div class="preset-tab" data-reason="结果不准确">结果不准确</div>
+                <div class="preset-tab" data-reason="提示不清晰">提示不清晰</div>
+                <div class="preset-tab" data-reason="缺少依据">缺少依据</div>
+                <div class="preset-tab" data-reason="不适用本场景">不适用本场景</div>
+            </div>
+            <div class="custom-input-section">
+                <label class="custom-input-label">自定义原因（可选）</label>
+                <textarea class="reason-input" id="reasonInput" placeholder="请输入其他原因..."></textarea>
+            </div>
+        </div>
+        <div class="popover-actions">
+            <button class="popover-btn secondary" onclick="closeRejectPopover()">取消</button>
+            <button class="popover-btn primary" onclick="confirmReject()">确认</button>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip">
+        <div class="tooltip-content" id="tooltipContent"></div>
+        <div class="tooltip-actions">
+            <button class="edit-btn" onclick="editReason(event)">✏️ 修改</button>
+        </div>
+    </div>
+
+<script>
+    // =============================================================================
+    // 最终版脚本
+    // =============================================================================
+
+    // 全局变量
+    const feedbackData = {};
+    let currentRuleId = null;
+    let currentEditRuleId = null;
+    let selectedReasons = [];
+    let hideTooltipTimer = null;
+
+    /**
+     * 折叠/展开卡片功能
+     */
+    function toggleCollapse(ruleId) {
+        const ruleItem = document.getElementById(ruleId);
+        if (!ruleItem) return;
+        
+        const ruleBody = ruleItem.querySelector('.rule-body');
+        const collapseBtn = ruleItem.querySelector('.collapse-btn');
+        
+        if (!ruleBody || !collapseBtn) return;
+        
+        const isCollapsed = ruleBody.style.display === 'none';
+        
+        if (isCollapsed) {
+            // 展开
+            ruleBody.style.display = 'block';
+            collapseBtn.textContent = '▼';
+            collapseBtn.title = '收起';
+        } else {
+            // 收起
+            ruleBody.style.display = 'none';
+            collapseBtn.textContent = '▶';
+            collapseBtn.title = '展开';
+        }
+    }
+
+    /**
+     * 辅助函数：显示、定位并设置弹窗的完整样式
+     */
+    function showAndPositionPopover(popoverEl, triggerEl) {
+        const rect = triggerEl.getBoundingClientRect();
+        let left = rect.left;
+        let top = rect.bottom + 8;
+        const margin = 10;
+        const popoverWidth = 400;
+        const popoverHeight = 350;
+
+        // 边界检查
+        if (left + popoverWidth > window.innerWidth - margin) {
+            left = window.innerWidth - popoverWidth - margin;
+        }
+        if (left < margin) {
+            left = margin;
+        }
+        if (top + popoverHeight > window.innerHeight - margin) {
+            const topPosition = rect.top - popoverHeight - 8;
+            top = topPosition >= margin ? topPosition : window.innerHeight - popoverHeight - margin;
+        }
+        if (top < margin) {
+            top = margin;
+        }
+
+        // 重置并应用完整样式
+        popoverEl.className = 'popover';
+        popoverEl.removeAttribute('style');
+        popoverEl.offsetHeight; // 强制DOM回流
+
+        popoverEl.style.cssText = `
+            position: fixed !important; left: ${left}px !important; top: ${top}px !important;
+            display: block !important; visibility: visible !important; opacity: 1 !important;
+            z-index: 99999 !important; background: white !important; border: 1px solid #e0e0e0 !important;
+            border-radius: 8px !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+            min-width: 320px !important; max-width: 400px !important; padding: 0 !important; margin: 0 !important;
+        `;
+    }
+
+    // 初始化/重置 预设标签
+    function initPresetTabs() {
+        document.querySelectorAll('.preset-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const reason = this.dataset.reason;
+                this.classList.toggle('selected');
+                if (this.classList.contains('selected')) {
+                    if (!selectedReasons.includes(reason)) selectedReasons.push(reason);
+                } else {
+                    selectedReasons = selectedReasons.filter(r => r !== reason);
+                }
+            });
+        });
+    }
+    function resetPresetTabs() {
+        document.querySelectorAll('.preset-tab').forEach(tab => tab.classList.remove('selected'));
+        selectedReasons = [];
+    }
+
+    // 核心交互函数
+    function acceptRule(ruleId) {
+        const ruleItem = document.querySelector(`[data-rule-id="${ruleId}"]`);
+        ruleItem.querySelector('.feedback-buttons').style.display = 'none';
+        ruleItem.querySelector('.feedback-status.accepted').style.display = 'flex';
+        ruleItem.querySelector('.feedback-status.rejected').style.display = 'none';
+        feedbackData[ruleId] = { status: 'accepted', reason: null, timestamp: new Date().toISOString() };
+    }
+    function rejectRule(ruleId, event) {
+        event.stopPropagation();
+        currentRuleId = ruleId;
+        resetPresetTabs();
+        document.getElementById('reasonInput').value = '';
+        const popover = document.getElementById('rejectPopover');
+        showAndPositionPopover(popover, event.target);
+    }
+    function editReason(event) {
+        event.stopPropagation();
+        if (!currentEditRuleId) return;
+        const feedback = feedbackData[currentEditRuleId];
+        if (!feedback) return;
+
+        const tooltip = document.getElementById('tooltip');
+        currentRuleId = currentEditRuleId; // 在编辑时，同步 currentRuleId
+        hideTooltip();
+        resetPresetTabs();
+
+        const popover = document.getElementById('rejectPopover');
+        if (feedback.reason && feedback.reason !== '未说明原因') {
+            const reasons = feedback.reason.split('；');
+            const presetReasons = ['结果不准确', '提示不清晰', '缺少依据', '不适用本场景'];
+            let customReasons = [];
+            reasons.forEach(reason => {
+                if (presetReasons.includes(reason)) {
+                    const tab = popover.querySelector(`[data-reason="${reason}"]`);
+                    if (tab) {
+                        tab.classList.add('selected');
+                        selectedReasons.push(reason);
+                    }
+                } else {
+                    customReasons.push(reason);
+                }
+            });
+            popover.querySelector('#reasonInput').value = customReasons.join('；');
+        } else {
+            popover.querySelector('#reasonInput').value = '';
+        }
+        
+        popover.querySelector('.popover-header').textContent = '修改不接受原因';
+        const confirmBtn = popover.querySelector('.popover-btn.primary');
+        confirmBtn.textContent = '保存';
+        confirmBtn.setAttribute('onclick', 'confirmEdit()');
+        
+        showAndPositionPopover(popover, tooltip);
+    }
+
+    // 确认与关闭函数
+    function confirmReject() {
+        const customReason = document.getElementById('reasonInput').value.trim();
+        let reasons = [...selectedReasons];
+        if (customReason) {
+            reasons.push(customReason);
+        }
+        const reasonText = reasons.length > 0 ? reasons.join('；') : '未说明原因';
+        const ruleItem = document.querySelector(`[data-rule-id="${currentRuleId}"]`);
+        ruleItem.querySelector('.feedback-buttons').style.display = 'none';
+        ruleItem.querySelector('.feedback-status.accepted').style.display = 'none';
+        ruleItem.querySelector('.feedback-status.rejected').style.display = 'flex';
+        feedbackData[currentRuleId] = { status: 'rejected', reason: reasonText, timestamp: new Date().toISOString() };
+        closeRejectPopover();
+    }
+    function confirmEdit() {
+        const customReason = document.getElementById('reasonInput').value.trim();
+        let reasons = [...selectedReasons];
+        if (customReason) {
+            reasons.push(customReason);
+        }
+        const reasonText = reasons.length > 0 ? reasons.join('；') : '未说明原因';
+        if (feedbackData[currentRuleId]) {
+            feedbackData[currentRuleId].reason = reasonText;
+            feedbackData[currentRuleId].timestamp = new Date().toISOString();
+        }
+        closeRejectPopover();
+    }
+    function closeRejectPopover() {
+        const popover = document.getElementById('rejectPopover');
+        if (!popover) return;
+        popover.style.display = 'none';
+        const header = popover.querySelector('.popover-header');
+        const confirmBtn = popover.querySelector('.popover-btn.primary');
+        header.textContent = '请说明不接受的原因';
+        confirmBtn.textContent = '确认';
+        confirmBtn.setAttribute('onclick', 'confirmReject()');
+        currentRuleId = null;
+        resetPresetTabs();
+    }
+
+    // 状态重置与悬停提示函数
+    function resetFeedback(ruleId) {
+        const ruleItem = document.querySelector(`[data-rule-id="${ruleId}"]`);
+        ruleItem.querySelector('.feedback-buttons').style.display = 'flex';
+        ruleItem.querySelector('.feedback-status.accepted').style.display = 'none';
+        ruleItem.querySelector('.feedback-status.rejected').style.display = 'none';
+        delete feedbackData[ruleId];
+        hideTooltip();
+    }
+    function showTooltip(event, ruleId) {
+        if (hideTooltipTimer) { clearTimeout(hideTooltipTimer); }
+        const feedback = feedbackData[ruleId];
+        if (!feedback || feedback.status !== 'rejected') return;
+        const tooltip = document.getElementById('tooltip');
+        tooltip.querySelector('#tooltipContent').innerHTML = feedback.reason ? `<strong>拒绝原因：</strong><br>${feedback.reason}` : '<strong>暂无备注</strong>';
+        const rect = event.target.getBoundingClientRect();
+        tooltip.style.left = rect.left + 'px';
+        tooltip.style.top = (rect.top - tooltip.offsetHeight - 10) + 'px';
+        tooltip.classList.add('show');
+        currentEditRuleId = ruleId;
+        tooltip.addEventListener('mouseenter', cancelHideTooltip);
+        tooltip.addEventListener('mouseleave', scheduleHideTooltip);
+    }
+    function cancelHideTooltip() {
+        if (hideTooltipTimer) { clearTimeout(hideTooltipTimer); }
+    }
+    function scheduleHideTooltip() {
+        hideTooltipTimer = setTimeout(hideTooltip, 300);
+    }
+    function hideTooltip() {
+        const tooltip = document.getElementById('tooltip');
+        tooltip.classList.remove('show');
+        currentEditRuleId = null;
+        tooltip.removeEventListener('mouseenter', cancelHideTooltip);
+        tooltip.removeEventListener('mouseleave', scheduleHideTooltip);
+    }
+
+    // 事件监听器
+    document.addEventListener('DOMContentLoaded', function() {
+        initPresetTabs();
+    });
+    document.addEventListener('click', function(e) {
+        const rejectPopover = document.getElementById('rejectPopover');
+        if (rejectPopover && !rejectPopover.contains(e.target) && rejectPopover.style.display === 'block') {
+            if (!e.target.closest('.edit-btn') && !e.target.closest('.feedback-status.rejected')) {
+                 closeRejectPopover();
+            }
+        }
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeRejectPopover();
+            hideTooltip();
+        }
+    });
+</script>
+
+</body>
+</html>

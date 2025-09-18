@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript测试页面</title>
+</head>
+<body>
+    <h1>JavaScript功能测试</h1>
+    <button onclick="testFunction()">测试按钮</button>
+    <div id="result"></div>
+
+    <script>
+        function testFunction() {
+            document.getElementById('result').innerHTML = '按钮点击成功！时间：' + new Date().toLocaleString();
+            alert('JavaScript正常工作！');
+        }
+        
+        console.log('页面加载完成，JavaScript正常运行');
+    </script>
+</body>
+</html>

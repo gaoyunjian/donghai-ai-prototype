@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI智能助手 - 采购风控审核系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 头部样式 */
+        .header {
+            background: #fff;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .ai-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .header h1 {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            margin-right: 8px;
+        }
+
+        .mode-tag {
+            background: #f0f0f0;
+            color: #666;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .try-btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-right: 16px;
+            transition: background 0.3s;
+        }
+
+        .try-btn:hover {
+            background: #3367d6;
+        }
+
+        .close-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: #999;
+        }
+
+        /* 主要内容区域 */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        /* 完成思考区域 */
+        .thinking-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4285f4;
+        }
+
+        .thinking-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .thinking-icon {
+            width: 20px;
+            height: 20px;
+            background: #4285f4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            color: white;
+            font-size: 12px;
+        }
+
+        .thinking-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .thinking-content {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* 智能检查区域 */
+        .check-section {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e8e8e8;
+            margin-bottom: 20px;
+        }
+
+        .check-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+        }
+
+        .check-icon {
+            width: 20px;
+            height: 20px;
+            background: #4285f4;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            color: white;
+            font-size: 12px;
+        }
+
+        .check-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .check-description {
+            padding: 0 20px 16px;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* 统计标签 */
+        .stats-tags {
+            padding: 0 20px 16px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .stat-tag {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1px solid;
+        }
+
+        .stat-tag.high-risk {
+            background: #fff2f0;
+            color: #cf1322;
+            border-color: #ffccc7;
+        }
+
+        .stat-tag.medium-risk {
+            background: #fff7e6;
+            color: #d46b08;
+            border-color: #ffd591;
+        }
+
+        .stat-tag.low-risk {
+            background: #f6ffed;
+            color: #389e0d;
+            border-color: #b7eb8f;
+        }
+
+        .stat-tag.passed {
+            background: #f0f9ff;
+            color: #0958d9;
+            border-color: #91caff;
+        }
+
+        /* 规则分类 */
+        .rules-section {
+            padding: 0 20px 20px;
+        }
+
+        .rule-category {
+            margin-bottom: 16px;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .category-title {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .category-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            transition: transform 0.3s;
+        }
+
+        .category-header.collapsed .category-icon {
+            transform: rotate(-90deg);
+        }
+
+        .rule-items {
+            margin-left: 24px;
+            margin-top: 8px;
+        }
+
+        .rule-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .rule-item:last-child {
+            border-bottom: none;
+        }
+
+        .rule-status {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .rule-status.error {
+            background: #ff4d4f;
+        }
+
+        .rule-status.success {
+            background: #52c41a;
+        }
+
+        .rule-name {
+            flex: 1;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .rule-arrow {
+            color: #999;
+            font-size: 12px;
+        }
+
+        /* 底部操作区域 */
+        .footer-actions {
+            padding: 16px 20px;
+            border-top: 1px solid #f0f0f0;
+            background: white;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: #1890ff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #40a9ff;
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: #666;
+            border: 1px solid #d9d9d9;
+        }
+
+        .btn-secondary:hover {
+            color: #1890ff;
+            border-color: #1890ff;
+        }
+
+        /* 底部信息 */
+        .footer-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .footer-actions-icons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-icon {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: #999;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        .action-icon:hover {
+            color: #1890ff;
+        }
+
+        /* 输入区域 */
+        .input-section {
+            padding: 16px 20px;
+            border-top: 1px solid #f0f0f0;
+            background: white;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 8px 16px;
+        }
+
+        .input-field {
+            flex: 1;
+            border: none;
+            background: none;
+            outline: none;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .input-field::placeholder {
+            color: #999;
+        }
+
+        .send-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #4285f4;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+            transition: background 0.3s;
+        }
+
+        .send-btn:hover {
+            background: #3367d6;
+        }
+
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* 对话区域样式 */
+        .chat-section {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .message-bubble {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .user-message {
+            justify-content: flex-end;
+        }
+
+        .user-message .message-content {
+            background: #1677ff;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 18px 18px 4px 18px;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+
+        .ai-message {
+            justify-content: flex-start;
+        }
+
+        .ai-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .ai-message .message-content {
+            background: #f5f5f5;
+            padding: 16px;
+            border-radius: 4px 18px 18px 18px;
+            max-width: 80%;
+            border: 1px solid #e8e8e8;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .ai-message .message-time {
+            text-align: left;
+            margin-left: 44px;
+        }
+
+        /* 调整原有内容在消息气泡中的样式 */
+        .ai-message .thinking-section,
+        .ai-message .check-section {
+            margin-bottom: 16px;
+        }
+
+        .ai-message .thinking-section:last-child,
+        .ai-message .check-section:last-child {
+            margin-bottom: 0;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .main-content {
+                padding: 16px;
+            }
+        }
+
+        /* 动画效果 */
+        .rule-items {
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .category-header.collapsed + .rule-items {
+            max-height: 0;
+            margin-top: 0;
+            opacity: 0;
+        }
+
+        .expandable {
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .expandable:hover {
+            background: #fafafa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 页面头部 -->
+        <div class="header">
+            <div class="header-left">
+                <div class="ai-icon">AI</div>
+                <h1>AI智能助手</h1>
+                <span class="mode-tag">问答模式</span>
+            </div>
+            <div class="header-right">
+                <button class="try-btn" onclick="tryDemo()">试一下</button>
+                <button class="close-btn" onclick="closePanel()">&times;</button>
+            </div>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <div class="main-content">
+        </div>
+
+        <!-- 对话区域 -->
+        <div class="chat-section">
+            <!-- 用户消息气泡 -->
+            <div class="message-bubble user-message">
+                <div class="message-content">
+                    请帮我检查这份采购合同的合规性
+                </div>
+                <div class="message-time">14:32</div>
+            </div>
+
+            <!-- AI助手回复气泡 -->
+            <div class="message-bubble ai-message">
+                <div class="ai-avatar">AI</div>
+                <div class="message-content">
+                    <div class="thinking-section">
+                        <div class="thinking-header">
+                            <div class="thinking-icon">✓</div>
+                            <div class="thinking-title">完成思考</div>
+                        </div>
+                        <div class="thinking-content">
+                            本方案用于购买合同的自动化合规检查，通过预设规则对合同文本进行解析与判断，辅助人工审核，提升效率与准确性。适用范围：购买合同问题、条款、流转等状态；合同要素完整性；合同要素完整性；核心合规要素；合同要素完整性等。
+                        </div>
+                    </div>
+
+                    <!-- 智能检查区域 -->
+                    <div class="check-section">
+                        <div class="check-header">
+                            <div class="check-icon">🔍</div>
+                            <div class="check-title">智能检查</div>
+                        </div>
+                        
+                        <div class="check-description">
+                            本方案用于购买合同的自动化合规检查，通过预设规则对合同文本进行解析与判断，辅助人工审核，提升效率与准确性。适用范围：购买合同问题、条款、流转等状态；合同要素完整性；合同要素完整性；核心合规要素；合同要素完整性等。
+                        </div>
+
+                        <!-- 统计标签 -->
+                        <div class="stats-tags">
+                            <span class="stat-tag high-risk">高风险(4)</span>
+                            <span class="stat-tag medium-risk">中风险(0)</span>
+                            <span class="stat-tag low-risk">低风险(0)</span>
+                            <span class="stat-tag passed">通过(2)</span>
+                        </div>
+
+                        <!-- 规则分类 -->
+                        <div class="rules-section">
+                            <!-- 财务规则 -->
+                            <div class="rule-category">
+                                <div class="category-header" onclick="toggleCategory(this)">
+                                    <div class="category-title">
+                                        <span class="category-icon">▼</span>
+                                        财务规则
+                                    </div>
+                                </div>
+                                <div class="rule-items">
+                                    <div class="rule-item expandable" onclick="showRuleDetail('首付比例审查')">
+                                        <div class="rule-status error">!</div>
+                                        <div class="rule-name">首付比例审查</div>
+                                        <div class="rule-arrow">></div>
+                                    </div>
+                                    <div class="rule-item expandable" onclick="showRuleDetail('金额字段检验')">
+                                        <div class="rule-status success">✓</div>
+                                        <div class="rule-name">金额字段检验</div>
+                                        <div class="rule-arrow">></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 条款规则 -->
+                            <div class="rule-category">
+                                <div class="category-header" onclick="toggleCategory(this)">
+                                    <div class="category-title">
+                                        <span class="category-icon">▼</span>
+                                        条款规则
+                                    </div>
+                                </div>
+                                <div class="rule-items">
+                                    <div class="rule-item expandable" onclick="showRuleDetail('违约责任条款审查')">
+                                        <div class="rule-status error">!</div>
+                                        <div class="rule-name">违约责任条款审查</div>
+                                        <div class="rule-arrow">></div>
+                                    </div>
+                                    <div class="rule-item expandable" onclick="showRuleDetail('履约条款审查')">
+                                        <div class="rule-status error">!</div>
+                                        <div class="rule-name">履约条款审查</div>
+                                        <div class="rule-arrow">></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 隐私规则 -->
+                            <div class="rule-category">
+                                <div class="category-header" onclick="toggleCategory(this)">
+                                    <div class="category-title">
+                                        <span class="category-icon">▼</span>
+                                        隐私规则
+                                    </div>
+                                </div>
+                                <div class="rule-items">
+                                    <div class="rule-item expandable" onclick="showRuleDetail('身份证号脱敏检查')">
+                                        <div class="rule-status error">!</div>
+                                        <div class="rule-name">身份证号脱敏检查</div>
+                                        <div class="rule-arrow">></div>
+                                    </div>
+                                    <div class="rule-item expandable" onclick="showRuleDetail('联系方式与银行卡脱敏检查')">
+                                        <div class="rule-status error">!</div>
+                                        <div class="rule-name">联系方式与银行卡脱敏检查</div>
+                                        <div class="rule-arrow">></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="message-time">14:33</div>
+            </div>
+        </div>
+
+        <!-- 底部操作区域 -->
+        <div class="footer-actions">
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="handleAccept()">接受</button>
+                <button class="btn btn-secondary" onclick="handleReject()">不接受</button>
+            </div>
+            
+            <div class="footer-info">
+                <div class="footer-left">
+                    <span>内容由AI生成，请点击查看详情 ></span>
+                </div>
+                <div class="footer-actions-icons">
+                    <button class="action-icon" onclick="likeResult()" title="点赞">👍</button>
+                    <button class="action-icon" onclick="dislikeResult()" title="点踩">👎</button>
+                    <button class="action-icon" onclick="refreshResult()" title="刷新">🔄</button>
+                    <button class="action-icon" onclick="shareResult()" title="分享">📤</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 输入区域 -->
+        <div class="input-section">
+            <div class="input-container">
+                <input type="text" class="input-field" placeholder="你好，我是你的助手" />
+                <button class="send-btn" onclick="sendMessage()">
+                    <span>➤</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 切换分类展开/收起
+        function toggleCategory(element) {
+            element.classList.toggle('collapsed');
+        }
+
+        // 显示规则详情
+        function showRuleDetail(ruleName) {
+            alert(`查看规则详情: ${ruleName}`);
+            console.log(`显示规则详情: ${ruleName}`);
+        }
+
+        // 试用功能
+        function tryDemo() {
+            alert('启动试用模式');
+            console.log('用户点击试用');
+        }
+
+        // 关闭面板
+        function closePanel() {
+            if (confirm('确定要关闭AI智能助手吗？')) {
+                window.close();
+            }
+        }
+
+        // 处理接受操作
+        function handleAccept() {
+            alert('已接受检查结果');
+            console.log('用户接受了检查结果');
+        }
+
+        // 处理不接受操作
+        function handleReject() {
+            alert('已拒绝检查结果');
+            console.log('用户拒绝了检查结果');
+        }
+
+        // 点赞功能
+        function likeResult() {
+            alert('感谢您的反馈！');
+            console.log('用户点赞');
+        }
+
+        // 点踩功能
+        function dislikeResult() {
+            alert('感谢您的反馈，我们会持续改进！');
+            console.log('用户点踩');
+        }
+
+        // 刷新结果
+        function refreshResult() {
+            alert('正在重新生成结果...');
+            console.log('刷新检查结果');
+        }
+
+        // 分享功能
+        function shareResult() {
+            alert('分享功能开发中...');
+            console.log('分享检查结果');
+        }
+
+        // 发送消息
+        function sendMessage() {
+            const input = document.querySelector('.input-field');
+            const message = input.value.trim();
+            if (message) {
+                alert(`发送消息: ${message}`);
+                input.value = '';
+                console.log(`用户发送消息: ${message}`);
+            }
+        }
+
+        // 回车发送消息
+        document.querySelector('.input-field').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('AI智能助手页面已加载');
+            
+            // 可以在这里添加更多初始化逻辑
+            // 比如从API获取检查结果数据等
+        });
+    </script>
+</body>
+</html>

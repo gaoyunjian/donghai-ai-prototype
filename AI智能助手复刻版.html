@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI智能助手 - 合规检查</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <style>
+        /* 自定义样式 */
+        .ai-container {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .gpt-side {
+            background: #f8f9fa;
+        }
+        
+        .message-container {
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+        
+        .message {
+            margin-bottom: 16px;
+        }
+        
+        .message-user .message-content {
+            background: #007bff;
+            color: white;
+            border-radius: 18px;
+            padding: 12px 16px;
+            margin-left: auto;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+        
+        .message-assistant .message-content {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 90%;
+        }
+        
+        .process-card {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            background: #f8f9fa;
+        }
+        
+        .process-card-title {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        
+        .gpt-plan-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+            overflow: hidden;
+        }
+        
+        .gpt-plan-card__header {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .gpt-plan-card__title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .gpt-plan-card__desc {
+            color: #666;
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        .gpt-plan-card-risk-level-content {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .gpt-plan-card-risk-level-ul {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .gpt-plan-card-risk-level-ul_li {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .gpt-plan-card-risk-level--high {
+            background: #fff5f5;
+            color: #dc3545;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .gpt-plan-card-risk-level--middle {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .gpt-plan-card-risk-level--low {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .gpt-plan-card-risk-level--pass {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .gpt-plan-expand {
+            margin-left: auto;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .gpt-plan-expand:hover {
+            background: #e9ecef;
+        }
+        
+        .gpt-plan-card-content {
+            padding: 0 20px 20px;
+        }
+        
+        .gpt-plan-card-group {
+            margin-bottom: 20px;
+        }
+        
+        .gpt-plan-card-group--header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 0;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+        }
+        
+        .gpt-plan-card-group--header:hover {
+            color: #007bff;
+        }
+        
+        .gpt-plan-card-rules {
+            margin-left: 24px;
+        }
+        
+        .gpt-plan-card-rule-list {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+        
+        .gpt-rule-status_high {
+            border-left: 4px solid #dc3545;
+        }
+        
+        .gpt-rule-status_pass {
+            border-left: 4px solid #28a745;
+        }
+        
+        .gpt-plan-card-rule-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .gpt-plan-card-rule-title:hover {
+            background: #e9ecef;
+        }
+        
+        .gpt-plan-card-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .gpt-plan-card-rule-overview {
+            font-weight: 500;
+        }
+        
+        .gpt-plan-card-rule-collapse {
+            transition: transform 0.2s;
+        }
+        
+        .gpt-plan-card-rule-detail {
+            padding: 16px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .gpt-plan-card-rule-detail-close {
+            display: none;
+        }
+        
+        .gpt-plan-card-rule-detail-describe {
+            color: #666;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        
+        .gpt-plan-card_risk {
+            background: #fff5f5;
+            border: 1px solid #f5c6cb;
+            border-radius: 6px;
+            padding: 12px;
+        }
+        
+        .gpt-plan-card-rule-detail-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .gpt-plan-card-rule-detail-title {
+            font-weight: 600;
+            color: #dc3545;
+            margin: 0;
+        }
+        
+        .gpt-plan-card-rule-detail-tool-icon {
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .gpt-plan-card-rule-detail-tool-icon:hover {
+            background: rgba(220, 53, 69, 0.1);
+        }
+        
+        .gpt-plan-card-rule-detail-content ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .gpt-plan-card-rule-detail-content li {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 4px;
+        }
+        
+        /* SVG 图标颜色 */
+        .gpt-rule_success {
+            color: #28a745;
+        }
+        
+        .gpt-rule_warning {
+            color: #ffc107;
+        }
+        
+        .deepseek {
+            color: #666;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .message-user .message-content {
+                max-width: 85%;
+            }
+            
+            .message-assistant .message-content {
+                max-width: 95%;
+            }
+            
+            .gpt-plan-card__header {
+                padding: 16px;
+            }
+            
+            .gpt-plan-card-content {
+                padding: 0 16px 16px;
+            }
+            
+            .gpt-plan-card-risk-level-ul {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            /* 消息底部操作栏样式 */
+            .message-footer {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 12px;
+                padding: 0 16px;
+            }
+            
+            .message-footer-ai {
+                color: #999;
+                font-size: 12px;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                cursor: pointer;
+            }
+            
+            .message-footer-ai svg {
+                width: 12px;
+                height: 12px;
+            }
+            
+            .message-footer-action {
+                display: flex;
+                gap: 8px;
+            }
+            
+            .action-icon {
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                color: #999;
+                border-radius: 4px;
+                transition: all 0.2s;
+            }
+            
+            .action-icon:hover {
+                background-color: #f5f5f5;
+                color: #333;
+            }
+            
+            /* 工具栏样式 */
+            .tool-bar {
+                position: fixed;
+                bottom: 80px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                background: white;
+                border-radius: 24px;
+                padding: 8px 16px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                border: 1px solid #eaeaea;
+            }
+            
+            .tool-bar-item {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            
+            .tool-bar-item.skill {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 12px;
+                border-radius: 16px;
+                background: #f8f9fa;
+            }
+            
+            .selected-skill-title {
+                font-size: 12px;
+                color: #666;
+            }
+            
+            .selected-skill {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+            
+            .selected-skill_name {
+                font-size: 12px;
+                color: #333;
+                max-width: 120px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            
+            .guide svg {
+                width: 14px;
+                height: 14px;
+                color: #999;
+            }
+            
+            .btn-clear {
+                width: 32px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                color: #999;
+                border-radius: 8px;
+                transition: all 0.2s;
+            }
+            
+            .btn-clear:hover {
+                background-color: #f5f5f5;
+                color: #333;
+            }
+            
+            /* 输入框样式 */
+            .input-area {
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: calc(100% - 40px);
+                max-width: 800px;
+            }
+            
+            .input-area-back {
+                background: white;
+                border-radius: 24px;
+                border: 1px solid #eaeaea;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                padding: 12px 16px;
+            }
+            
+            .input-row {
+                display: flex;
+                align-items: flex-end;
+                gap: 12px;
+            }
+            
+            #message-input {
+                flex: 1;
+                border: none;
+                outline: none;
+                resize: none;
+                font-size: 14px;
+                line-height: 18px;
+                min-height: 18px;
+                max-height: 120px;
+                background: transparent;
+            }
+            
+            #message-input::placeholder {
+                color: #999;
+            }
+            
+            .input-send {
+                width: 32px;
+                height: 32px;
+                border: none;
+                border-radius: 16px;
+                background: linear-gradient(135deg, #5C8AFF 0%, #786CFF 100%);
+                color: white;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s;
+            }
+            
+            .input-send:hover {
+                transform: scale(1.05);
+            }
+            
+            .input-send:active {
+                transform: scale(0.95);
+            }
+            
+            /* 底部滚动按钮样式 */
+            .height-0 {
+                height: 0;
+            }
+            
+            /* 工具提示 */
+            [title] {
+                position: relative;
+            }
+            
+            /* 确保页面底部有足够空间 */
+            body {
+                padding-bottom: 200px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="ai-container gpt-side h-full w-full">
+        <div class="gpt-content">
+            <header class="header"></header>
+            
+            <div class="message-container relative p-3 pb-0">
+                <div class="message-list" id="message-list_8b4c8316-646c-4bae-8489-ee0f31ab4379">
+                    
+                    <!-- 用户消息 -->
+                    <div class="message message-user" id="message-ba6b11c6-3dfc-454b-8470-274590517c38">
+                        <div class="message-content" id="message-content-ba6b11c6-3dfc-454b-8470-274590517c38">
+                            <div class="gpt-message-content_inner prose prose-slate prose-sm max-w-none dark:prose-invert">
+                                <p>试一下</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- AI助手回复 -->
+                    <div class="message message-assistant" id="message-97b6d1c1-2a81-43da-853d-c6e85a8b793e">
+                        <div class="message-content" id="message-content-97b6d1c1-2a81-43da-853d-c6e85a8b793e">
+                            
+                            <!-- 完成思考卡片 -->
+                            <div class="process-card">
+                                <div class="process-card-title">
+                                    <span class="process-card-title-text">
+                                        <svg class="text-[16px] deepseek" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                            <g fill="none">
+                                                <path d="M14.0967 1.90436C15.3348 3.14044 15.0943 5.52981 13.7054 8.00001C15.0943 10.4722 15.3338 12.8596 14.0967 14.0966C12.8597 15.3337 10.4713 15.0942 8.00108 13.7073C5.52892 15.0932 3.13955 15.3337 1.90347 14.0976C0.666398 12.8596 0.905926 10.4722 2.29282 8.00001C0.905926 5.52883 0.666398 3.14044 1.90347 1.90338C3.14054 0.666307 5.52892 0.905835 8.0001 2.29273C10.4713 0.905835 12.8597 0.666307 14.0967 1.90338V1.90436ZM3.04591 9.1868L3.01338 9.25186C2.17552 11.0064 2.06907 12.5402 2.76399 13.2361C3.46779 13.9399 5.03113 13.8206 6.81429 12.9562C6.08599 12.4388 5.40276 11.8607 4.77189 11.2282C4.13988 10.5981 3.56248 9.91553 3.04591 9.18779V9.1868ZM12.9553 9.1868L12.7907 9.41549C11.7835 10.778 10.5672 11.9726 9.1869 12.9552C10.9681 13.8206 12.5314 13.9409 13.2352 13.2361C13.94 12.5323 13.8197 10.969 12.9553 9.1868ZM8.0001 3.71413L7.90448 3.77524C7.08536 4.31541 6.32439 4.93838 5.63242 5.6343C4.90991 6.35221 4.2662 7.14528 3.71225 8.00001C4.26649 8.85482 4.91018 9.64819 5.63242 10.3667C6.3509 11.0897 7.14464 11.7337 8.0001 12.2879C8.85457 11.7336 9.64761 11.0899 10.3658 10.3677C11.0885 9.64854 11.7323 8.85413 12.286 7.99803C11.7315 7.1446 11.0878 6.35256 10.3658 5.63528C9.64789 4.91278 8.85482 4.26907 8.0001 3.71511V3.71413ZM7.88181 6.64662C8.08487 6.64145 8.28691 6.67698 8.47602 6.75112C8.66513 6.82526 8.83749 6.9365 8.98293 7.07829C9.12838 7.22008 9.24397 7.38955 9.3229 7.57671C9.40182 7.76388 9.44248 7.96495 9.44248 8.16807C9.44248 8.37119 9.40182 8.57226 9.3229 8.75943C9.24397 8.94659 9.12838 9.11606 8.98293 9.25785C8.83749 9.39964 8.66513 9.51088 8.47602 9.58502C8.28691 9.65916 8.08487 9.69469 7.88181 9.68952C7.485 9.67942 7.10784 9.51469 6.83076 9.23046C6.55368 8.94624 6.3986 8.56501 6.3986 8.16807C6.3986 7.77113 6.55368 7.3899 6.83076 7.10568C7.10784 6.82145 7.485 6.65672 7.88181 6.64662ZM6.81429 3.04582C5.03212 2.18036 3.46779 2.06109 2.76301 2.76489C2.05921 3.46869 2.17947 5.03203 3.04492 6.81419C3.56203 6.08628 4.13974 5.40338 4.77189 4.77278C5.33634 4.20716 5.94262 3.68489 6.5856 3.21043L6.81429 3.04582ZM9.25097 3.01427L9.1869 3.0468C9.91435 3.56331 10.5965 4.14094 11.2273 4.77278C11.8601 5.40364 12.4378 6.08575 12.9543 6.81321C13.8197 5.03203 13.94 3.46869 13.2352 2.76489C12.5403 2.06996 11.0065 2.1774 9.25097 3.01427Z" fill="#999999"></path>
+                                            </g>
+                                        </svg>
+                                        完成思考
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- 智能检查卡片 -->
+                            <div class="gpt-plan-card gpt-copy-ignore">
+                                <header class="gpt-plan-card__header">
+                                    <h2 class="gpt-plan-card__title">
+                                        <svg class="text-[32px]" width="1em" height="1em" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                            <g fill="none">
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M15.5471 0.599735C18.5459 0.0869799 24.0461 -0.443875 31.9786 0.599735C39.9111 1.64335 44.9571 6.05789 46.6388 11.3799C48.3204 16.7019 48.1984 27.1094 47.5788 32.3158C47.07 38.5475 43.4427 45.924 34.7683 47.2091C26.0939 48.4941 15.4335 48.1514 11.1572 46.6287C6.88095 45.1059 1.21772 41.8638 0.477232 32.7825C-0.263252 23.7012 -0.752563 11.5131 3.86834 6.57115C7.07241 2.76432 12.5484 1.11249 15.5471 0.599735Z" fill="#EBF3FF"></path>
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M15.25 13H31.5L38 19V37C38 38.6569 35.7949 41 34 41H15.25C13.4551 41 12 39.6569 12 38V16C12 14.3431 13.4551 13 15.25 13Z" fill="#2C5CF7" fill-opacity="0.04"></path>
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M15.25 12H31.5L38 18V36C38 37.6569 35.7949 40 34 40H15.25C13.4551 40 12 38.6569 12 37V15C12 13.3431 13.4551 12 15.25 12Z" fill="#2C5CF7" fill-opacity="0.12"></path>
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M15.125 11H30.75L37 17V35.5C37 37.1569 35.2259 39 33.5 39H15.125C13.3991 39 12 37.6569 12 36V14C12 12.3431 13.3991 11 15.125 11Z" fill="#2C5CF7" fill-opacity="0.2"></path>
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M15 10H30L36 16V35C36 36.6569 34.6569 38 33 38H15C13.3431 38 12 36.6569 12 35V13C12 11.3431 13.3431 10 15 10Z" fill="url(#uicons-qd1wizbmyt)"></path>
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M20.895 18C21.4467 18 21.8939 18.4472 21.8939 18.9989C21.8939 19.5255 21.4864 19.9569 20.9696 19.995L20.895 19.9978H18.8972C18.6411 19.9978 18.43 20.1906 18.4012 20.439L18.3978 20.4972V22.495C18.3978 23.0467 17.9506 23.4939 17.3989 23.4939C16.8723 23.4939 16.4409 23.0864 16.4028 22.5696L16.4 22.495V20.4972C16.4 19.1543 17.46 18.059 18.7889 18.0023L18.8972 18H20.895ZM27.3878 24.9922C29.5945 24.9922 31.3833 26.7811 31.3833 28.9877C31.3833 29.7287 31.1816 30.4226 30.8301 31.0175L32.1074 32.2947C32.4975 32.6848 32.4975 33.3173 32.1074 33.7074C31.7378 34.0769 31.1507 34.0964 30.7583 33.7657L30.6948 33.7074L29.4175 32.4301C28.8226 32.7816 28.1288 32.9833 27.3878 32.9833C25.1811 32.9833 23.3922 31.1944 23.3922 28.9877C23.3922 26.7811 25.1811 24.9922 27.3878 24.9922ZM17.3989 27.4895C17.9255 27.4895 18.3569 27.897 18.3951 28.4138L18.3978 28.4884V30.4862L18.4012 30.5444C18.4278 30.7737 18.6097 30.9556 18.839 30.9823L18.8972 30.9856H20.895L20.9696 30.9884C21.4864 31.0265 21.8939 31.4579 21.8939 31.9845C21.8939 32.5111 21.4864 32.9425 20.9696 32.9807L20.895 32.9834H18.8972L18.7889 32.9811C17.4969 32.9259 16.4591 31.8891 16.4025 30.5975L16.4 30.4862V28.4884L16.4028 28.4138C16.4409 27.897 16.8723 27.4895 17.3989 27.4895ZM25.39 28.9879C25.39 27.8845 26.2845 26.9901 27.3878 26.9901C28.4911 26.9901 29.3856 27.8845 29.3856 28.9879C29.3856 30.0912 28.4911 30.9857 27.3878 30.9857C26.2845 30.9857 25.39 30.0912 25.39 28.9879ZM28.9945 18.0023L28.8862 18H26.8884L26.8139 18.0027C26.297 18.0409 25.8895 18.4723 25.8895 18.9989C25.8895 19.5255 26.297 19.9569 26.8139 19.995L26.8884 19.9978H28.8862L28.9444 20.0011C29.1737 20.0278 29.3556 20.2097 29.3823 20.439L29.3856 20.4972V22.495L29.3884 22.5696C29.4265 23.0864 29.8579 23.4939 30.3845 23.4939C30.9111 23.4939 31.3425 23.0864 31.3807 22.5696L31.3834 22.495V20.4972L31.381 20.3859C31.3243 19.0943 30.2865 18.0574 28.9945 18.0023Z" fill="white"></path>
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M30 10L36 16H31C30.4477 16 30 15.5523 30 15V10Z" fill="#2C5CF7"></path>
+                                                <defs>
+                                                    <linearGradient id="uicons-qd1wizbmyt" x1="47" y1="24" x2="19.795" y2="2.62461" gradientUnits="userSpaceOnUse">
+                                                        <stop stop-color="#2C5CF7"></stop>
+                                                        <stop offset="1" stop-color="#80A6FF"></stop>
+                                                    </linearGradient>
+                                                </defs>
+                                            </g>
+                                        </svg>
+                                        <span class="gpt-plan-card__name">智能检查</span>
+                                    </h2>
+                                    <p class="gpt-plan-card__desc">
+                                        本方案用于 购房合同的自动化合规检查，通过预设规则对合同文本进行解析与判定，辅助人工审核，提升效率与准确性。<br><br>
+                                        适用范围：购房合同归档、审批、流转等环节<br><br>
+                                        核心检查维度：<br><br>
+                                        合同要素完整性：合同编号、房源编号、甲乙双方信息是否齐全<br><br>
+                                        财务合规性：总价、首付比例、贷款金额是否符合公司及监管标准<br><br>
+                                        条款规范性：是否包含违约责任条款，是否存在模糊表述<br><br>
+                                        隐私合规性：身份证号、手机号、银行卡号等敏感信息是否脱敏<br><br>
+                                        输出结果：对不符合规则的内容进行分组提示，标记风险等级，并生成审核报告供人工确认<br><br>
+                                        通过本方案，可实现 自动预检 + 风险提示 + 人工复核 的闭环，减少人工遗漏，保障合同合规性与数据安全。
+                                    </p>
+                                </header>
+                                
+                                <div class="gpt-plan-card__container">
+                                    <!-- 风险等级统计 -->
+                                    <div class="gpt-plan-card-risk-level-content">
+                                        <div class="gpt-plan-card-risk-level-ul relative">
+                                            <div class="gpt-plan-card-risk-level-ul_li gpt-plan-card-risk-level--high">
+                                                <span class="gpt-plan-card-risk-level--span">
+                                                    <svg class="text-[12px]" width="1em" height="1em" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                        <g fill="none">
+                                                            <rect x="0.5" y="0.5" width="11" height="11" rx="1.5" fill="white"></rect>
+                                                            <rect x="0.5" y="0.5" width="11" height="11" rx="1.5" stroke="currentColor"></rect>
+                                                        </g>
+                                                    </svg>
+                                                </span>
+                                                高风险(4)
+                                            </div>
+                                            <div class="gpt-plan-card-risk-level-ul_li gpt-plan-card-risk-level--middle">
+                                                <span class="gpt-plan-card-risk-level--span">
+                                                    <svg class="text-[12px]" width="1em" height="1em" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                        <g fill="none">
+                                                            <rect x="0.5" y="0.5" width="11" height="11" rx="1.5" fill="white"></rect>
+                                                            <rect x="0.5" y="0.5" width="11" height="11" rx="1.5" stroke="currentColor"></rect>
+                                                        </g>
+                                                    </svg>
+                                                </span>
+                                                中风险(0)
+                                            </div>
+                                            <div class="gpt-plan-card-risk-level-ul_li gpt-plan-card-risk-level--low">
+                                                <span class="gpt-plan-card-risk-level--span">
+                                                    <svg class="text-[12px]" width="1em" height="1em" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                        <g fill="none">
+                                                            <rect x="0.5" y="0.5" width="11" height="11" rx="1.5" fill="white"></rect>
+                                                            <rect x="0.5" y="0.5" width="11" height="11" rx="1.5" stroke="currentColor"></rect>
+                                                        </g>
+                                                    </svg>
+                                                </span>
+                                                低风险(0)
+                                            </div>
+                                            <div class="gpt-plan-card-risk-level-ul_li gpt-plan-card-risk-level--pass">
+                                                <span class="gpt-plan-card-risk-level--span">
+                                                    <svg class="text-[12px]" width="1em" height="1em" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                        <g fill="none">
+                                                            <rect x="0.5" y="0.5" width="11" height="11" rx="1.5" fill="white"></rect>
+                                                            <rect x="0.5" y="0.5" width="11" height="11" rx="1.5" stroke="currentColor"></rect>
+                                                        </g>
+                                                    </svg>
+                                                </span>
+                                                通过(2)
+                                            </div>
+                                            <div class="gpt-plan-expand">
+                                                <svg class="text-[16px]" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                    <g fill="none" stroke="currentColor">
+                                                        <path d="M2 3.2h6M2 8h6M2 12.8h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path>
+                                                        <path d="m10 4 2 2 2-2M10 12l2-2 2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                    </g>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 规则分类内容 -->
+                                    <div class="gpt-plan-card-content">
+                                        
+                                        <!-- 财务规则 -->
+                                        <div class="gpt-plan-card-group">
+                                            <div class="gpt-plan-card-detail">
+                                                <div class="gpt-plan-card-group--header" onclick="toggleGroup(this)">
+                                                    <span class="gpt-plan-card-group--header-icon">
+                                                        <svg class="text-[16px]" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                            <g fill="none">
+                                                                <path d="M8.31236 11.6095C8.15223 11.8097 7.84779 11.8097 7.68766 11.6095L3.18658 5.98319C2.97705 5.72129 3.16352 5.33331 3.49893 5.33331L12.5011 5.33331C12.8365 5.33331 13.023 5.72129 12.8134 5.98319L8.31236 11.6095Z" fill="#999999"></path>
+                                                            </g>
+                                                        </svg>
+                                                    </span>
+                                                    <span class="gpt-plan-card-group--header-text">财务规则</span>
+                                                </div>
+                                                <div class="gpt-plan-card-rules gpt-plan-card-rules_margin">
+                                                    
+                                                    <!-- 首付比例审查 -->
+                                                    <div class="gpt-plan-card-rule-list gpt-rule-status_high">
+                                                        <div class="gpt-plan-card-rule-title" onclick="toggleRule(this)">
+                                                            <span class="gpt-plan-card-status">
+                                                                <svg class="text-[14px] gpt-rule_success" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                                    <g fill="none">
+                                                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M1 8C1 4.13401 4.13401 1 8 1C11.866 1 15 4.13401 15 8C15 11.866 11.866 15 8 15C4.13401 15 1 11.866 1 8ZM11.2134 5.83751C10.9856 5.6097 10.6163 5.6097 10.3885 5.83751L6.81278 9.41166L5.30123 7.8999L5.22044 7.83241C4.9931 7.67491 4.67877 7.69741 4.47627 7.8999C4.24847 8.12771 4.24847 8.49706 4.47627 8.72486L6.40118 10.6498L6.48197 10.7173C6.70931 10.8748 7.02364 10.8523 7.22613 10.6498L11.2134 6.66247L11.2809 6.58168C11.4384 6.35433 11.4159 6.04 11.2134 5.83751Z" fill="currentColor"></path>
+                                                                    </g>
+                                                                </svg>
+                                                                <svg class="text-[14px] gpt-rule_warning" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                                    <g fill="none">
+                                                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M8 1C11.866 1 15 4.13401 15 8C15 11.866 11.866 15 8 15C4.13401 15 1 11.866 1 8C1 4.13401 4.13401 1 8 1ZM8 10.3333C8.42956 10.3333 8.77778 10.6816 8.77778 11.1111C8.77778 11.5407 8.42956 11.8889 8 11.8889C7.57045 11.8889 7.22222 11.5407 7.22222 11.1111C7.22222 10.6816 7.57045 10.3333 8 10.3333ZM8 4.11111C8.32217 4.11111 8.58333 4.37228 8.58333 4.69444V8.77778C8.58333 9.09994 8.32217 9.36111 8 9.36111C7.67783 9.36111 7.41667 9.09994 7.41667 8.77778V4.69444C7.41667 4.37228 7.67783 4.11111 8 4.11111Z" fill="currentColor"></path>
+                                                                    </g>
+                                                                </svg>
+                                                            </span>
+                                                            <span class="gpt-plan-card-rule-overview">首付比例审查</span>
+                                                            <i class="gpt-plan-card-rule-collapse">
+                                                                <svg class="text-[14px]" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                                    <g fill="none">
+                                                                        <path d="M3 6.00082L7.80102 10.8L12.6 6" stroke="#999999" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                    </g>
+                                                                </svg>
+                                                            </i>
+                                                        </div>
+                                                        <div class="gpt-plan-card-rule-detail gpt-plan-card-rule-detail-close">
+                                                            <div class="gpt-plan-card-rule-detail-describe">
+                                                                合同中的首付比例不得低于公司财务规定的最低30%。
+                                                            </div>
+                                                            <div class="gpt-plan-card_risk">
+                                                                <div class="gpt-plan-card-rule-detail-header">
+                                                                    <p class="gpt-plan-card-rule-detail-title">风险点:</p>
+                                                                    <span class="gpt-plan-card-rule-detail-tool-icon">
+                                                                        <svg class="text-[14px]" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                                            <g fill="none">
+                                                                                <rect x="4.80005" y="4.79999" width="9.6" height="9.6" rx="0.6" stroke="currentColor" stroke-width="1.2"></rect>
+                                                                                <path d="M11.2001 2.59998V2.19998C11.2001 1.8686 10.9315 1.59998 10.6001 1.59998H2.2001C1.86873 1.59998 1.6001 1.8686 1.6001 2.19998V10.6C1.6001 10.9313 1.86873 11.2 2.2001 11.2H2.6001" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path>
+                                                                            </g>
+                                                                        </svg>
+                                                                    </span>
+                                                                </div>
+                                                                <div class="gpt-plan-card-rule-detail-content">
+                                                                    <div>
+                                                                        <ul>
+                                                                            <li>首付比例为15%，低于规定的30%最低要求，不符合合规标准。需修改付款条件以提高首付比例至30%或以上。</li>
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- 金额字段校验 -->
+                                                    <div class="gpt-plan-card-rule-list gpt-rule-status_pass">
+                                                        <div class="gpt-plan-card-rule-title" onclick="toggleRule(this)">
+                                                            <span class="gpt-plan-card-status">
+                                                                <svg class="text-[14px] gpt-rule_success" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                                    <g fill="none">
+                                                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M1 8C1 4.13401 4.13401 1 8 1C11.866 1 15 4.13401 15 8C15 11.866 11.866 15 8 15C4.13401 15 1 11.866 1 8ZM11.2134 5.83751C10.9856 5.6097 10.6163 5.6097 10.3885 5.83751L6.81278 9.41166L5.30123 7.8999L5.22044 7.83241C4.9931 7.67491 4.67877 7.69741 4.47627 7.8999C4.24847 8.12771 4.24847 8.49706 4.47627 8.72486L6.40118 10.6498L6.48197 10.7173C6.70931 10.8748 7.02364 10.8523 7.22613 10.6498L11.2134 6.66247L11.2809 6.58168C11.4384 6.35433 11.4159 6.04 11.2134 5.83751Z" fill="currentColor"></path>
+                                                                    </g>
+                                                                </svg>
+                                                                <svg class="text-[14px] gpt-rule_warning" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                                    <g fill="none">
+                                                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M8 1C11.866 1 15 4.13401 15 8C15 11.866 11.866 15 8 15C4.13401 15 1 11.866 1 8C1 4.13401 4.13401 1 8 1ZM8 10.3333C8.42956 10.3333 8.77778 10.6816 8.77778 11.1111C8.77778 11.5407 8.42956 11.8889 8 11.8889C7.57045 11.8889 7.22222 11.5407 7.22222 11.1111C7.22222 10.6816 7.57045 10.3333 8 10.3333ZM8 4.11111C8.32217 4.11111 8.58333 4.37228 8.58333 4.69444V8.77778C8.58333 9.09994 8.32217 9.36111 8 9.36111C7.67783 9.36111 7.41667 9.09994 7.41667 8.77778V4.69444C7.41667 4.37228 7.67783 4.11111 8 4.11111Z" fill="currentColor"></path>
+                                                                    </g>
+                                                                </svg>
+                                                            </span>
+                                                            <span class="gpt-plan-card-rule-overview">金额字段校验</span>
+                                                            <i class="gpt-plan-card-rule-collapse">
+                                                                <svg class="text-[14px]" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                                    <g fill="none">
+                                                                        <path d="M3 6.00082L7.80102 10.8L12.6 6" stroke="#999999" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                    </g>
+                                                                </svg>
+                                                            </i>
+                                                        </div>
+                                                        <div class="gpt-plan-card-rule-detail gpt-plan-card-rule-detail-close">
+                                                            <div class="gpt-plan-card-rule-detail-describe">
+                                                                合同中的金额类字段必须为数字，且大于0。
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- 条款规则 -->
+                                        <div class="gpt-plan-card-group">
+                                            <div class="gpt-plan-card-detail">
+                                                <div class="gpt-plan-card-group--header" onclick="toggleGroup(this)">
+                                                    <span class="gpt-plan-card-group--header-icon">
+                                                        <svg class="text-[16px]" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                            <g fill="none">
+                                                                <path d="M8.31236 11.6095C8.15223 11.8097 7.84779 11.8097 7.68766 11.6095L3.18658 5.98319C2.97705 5.72129 3.16352 5.33331 3.49893 5.33331L12.5011 5.33331C12.8365 5.33331 13.023 5.72129 12.8134 5.98319L8.31236 11.6095Z" fill="#999999"></path>
+                                                            </g>
+                                                        </svg>
+                                                    </span>
+                                                    <span class="gpt-plan-card-group--header-text">条款规则</span>
+                                                </div>
+                                                <div class="gpt-plan-card-rules gpt-plan-card-rules_margin">
+                                                    
+                                                    <!-- 违约责任条款审查 -->
+                                                    <div class="gpt-plan-card-rule-list gpt-rule-status_high">
+                                                        <div class="gpt-plan-card-rule-title" onclick="toggleRule(this)">
+                                                            <span class="gpt-plan-card-status">
+                                                                <svg class="text-[14px] gpt-rule_success" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                                    <g fill="none">
+                                                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M1 8C1 4.13401 4.13401 1 8 1C11.866 1 15 4.13401 15 8C15 11.866 11.866 15 8 15C4.13401 15 1 11.866 1 8ZM11.2134 5.83751C10.9856 5.6097 10.6163 5.6097 10.3885 5.83751L6.81278 9.41166L5.30123 7.8999L5.22044 7.83241C4.9931 7.67491 4.67877 7.69741 4.47627 7.8999C4.24847 8.12771 4.24847 8.49706 4.47627 8.72486L6.40118 10.6498L6.48197 10.7173C6.70931 10.8748 7.02364 10.8523 7.22613 10.6498L11.2134 6.66247L11.2809 6.58168C11.4384 6.35433 11.4159 6.04 11.2134 5.83751Z" fill="currentColor"></path>
+                                                                    </g>
+                                                                </svg>
+                                                                <svg class="text-[14px] gpt-rule_warning" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                                    <g fill="none">
+                                                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M8 1C11.866 1 15 4.13401 15 8C15 11.866 11.866 15 8 15C4.13401 15 1 11.866 1 8C1 4.13401 4.13401 1 8 1ZM8 10.3333C8.42956 10.3333 8.77778 10.6816 8.77778 11.1111C8.77778 11.5407 8.42956 11.8889 8 11.8889C7.57045 11.8889 7.22222 11.5407 7.22222 11.1111C7.22222 10.6816 7.57045 10.3333 8 10.3333ZM8 4.11111C8.32217 4.11111 8.58333 4.37228 8.58333 4.69444V8.77778C8.58333 9.09994 8.32217 9.36111 8 9.36111C7.67783 9.36111 7.41667 9.09994 7.41667 8.77778V4.69444C7.41667 4.37228 7.67783 4.11111 8 4.11111Z" fill="currentColor"></path>
+                                                                    </g>
+                                                                </svg>
+                                                            </span>
+                                                            <span class="gpt-plan-card-rule-overview">违约责任条款审查</span>
+                                                            <i class="gpt-plan-card-rule-collapse">
+                                                                <svg class="text-[14px]" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                                    <g fill="none">
+                                                                        <path d="M3 6.00082L7.80102 10.8L12.6 6" stroke="#999999" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                    </g>
+                                                                </svg>
+                                                            </i>
+                                                        </div>
+                                                        <div class="gpt-plan-card-rule-detail gpt-plan-card-rule-detail-close">
+                                                            <div class="gpt-plan-card-rule-detail-describe">
+                                                                合同必须包含违约责任条款，明确责任和违约金计算方式。
+                                                            </div>
+                                                            <div class="gpt-plan-card_risk">
+                                                                <div class="gpt-plan-card-rule-detail-header">
+                                                                    <p class="gpt-plan-card-rule-detail-title">风险点:</p>
+                                                                    <span class="gpt-plan-card-rule-detail-tool-icon">
+                                                                        <svg class="text-[14px]" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                                            <g fill="none">
+                                                                                <rect x="4.80005" y="4.79999" width="9.6" height="9.6" rx="0.6" stroke="currentColor" stroke-width="1.2"></rect>
+                                                                                <path d="M11.2001 2.59998V2.19998C11.2001 1.8686 10.9315 1.59998 10.6001 1.59998H2.2001C1.86873 1.59998 1.6001 1.8686 1.6001 2.19998V10.6C1.6001 10.9313 1.86873 11.2 2.2001 11.2H2.6001" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path>
+                                                                            </g>
+                                                                        </svg>
+                                                                    </span>
+                                                                </div>
+                                                                <div class="gpt-plan-card-rule-detail-content">
+                                                                    <div>
+                                                                        <ul>
+                                                                            <li>合同中虽有'违约责任'条款，但部分违约金计算方式不合理或不可执行：1. 乙方单方面评估甲方赔偿金额，缺乏客观标准；2. '精神损失费'10万元无法律依据；3. 违约金比例高达总房款30%，可能超出法定合理范围。建议根据《民法典》调整为合理、对等的违约责任约定。</li>
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- 模糊表述禁用 -->
+                                                    <div class="gpt-plan-card-rule-list gpt-rule-status_pass">
+                                                        <div class="gpt-plan-card-rule-title" onclick="toggleRule(this)">
+                                                            <span class="gpt-plan-card-status">
+                                                                <svg class="text-[14px] gpt-rule_success" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                                    <g fill="none">
+                                                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M1 8C1 4.13401 4.13401 1 8 1C11.866 1 15 4.13401 15 8C15 11.866 11.866 15 8 15C4.13401 15 1 11.866 1 8ZM11.2134 5.83751C10.9856 5.6097 10.6163 5.6097 10.3885 5.83751L6.81278 9.41166L5.30123 7.8999L5.22044 7.83241C4.9931 7.67491 4.67877 7.69741 4.47627 7.8999C4.24847 8.12771 4.24847 8.49706 4.47627 8.72486L6.40118 10.6498L6.48197 10.7173C6.70931 10.8748 7.02364 10.8523 7.22613 10.6498L11.2134 6.66247L11.2809 6.58168C11.4384 6.35433 11.4159 6.04 11.2134 5.83751Z" fill="currentColor"></path>
+                                                                    </g>
+                                                                </svg>
+                                                                <svg class="text-[14px] gpt-rule_warning" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                                    <g fill="none">
+                                                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M8 1C11.866 1 15 4.13401 15 8C15 11.866 11.866 15 8 15C4.13401 15 1 11.866 1 8C1 4.13401 4.13401 1 8 1ZM8 10.3333C8.42956 10.3333 8.77778 10.6816 8.77778 11.1111C8.77778 11.5407 8.42956 11.8889 8 11.8889C7.57045 11.8889 7.22222 11.5407 7.22222 11.1111C7.22222 10.6816 7.57045 10.3333 8 10.3333ZM8 4.11111C8.32217 4.11111 8.58333 4.37228 8.58333 4.69444V8.77778C8.58333 9.09994 8.32217 9.36111 8 9.36111C7.67783 9.36111 7.41667 9.09994 7.41667 8.77778V4.69444C7.41667 4.37228 7.67783 4.11111 8 4.11111Z" fill="currentColor"></path>
+                                                                    </g>
+                                                                </svg>
+                                                            </span>
+                                                            <span class="gpt-plan-card-rule-overview">模糊表述禁用</span>
+                                                            <i class="gpt-plan-card-rule-collapse">
+                                                                <svg class="text-[14px]" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                                    <g fill="none">
+                                                                        <path d="M3 6.00082L7.80102 10.8L12.6 6" stroke="#999999" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                    </g>
+                                                                </svg>
+                                                            </i>
+                                                        </div>
+                                                        <div class="gpt-plan-card-rule-detail gpt-plan-card-rule-detail-close">
+                                                            <div class="gpt-plan-card-rule-detail-describe">
+                                                                合同中不得出现"口头承诺""另行约定"等模糊表达。
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- 隐私规则 -->
+                        <div class="gpt-plan-card-group">
+                            <div class="gpt-plan-card-detail">
+                                <div class="gpt-plan-card-group--header" onclick="toggleGroup(this)">
+                                    <span class="gpt-plan-card-group--header-icon">
+                                        <svg class="text-[16px]" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                            <g fill="none">
+                                                <path d="M8.31236 11.6095C8.15223 11.8097 7.84779 11.8097 7.68766 11.6095L3.18658 5.98319C2.97705 5.72129 3.16352 5.33331 3.49893 5.33331L12.5011 5.33331C12.8365 5.33331 13.023 5.72129 12.8134 5.98319L8.31236 11.6095Z" fill="#999999"></path>
+                                            </g>
+                                        </svg>
+                                    </span>
+                                    <span class="gpt-plan-card-group--header-text">隐私规则</span>
+                                </div>
+                                <div class="gpt-plan-card-rules gpt-plan-card-rules_margin">
+                                    
+                                    <!-- 身份证号脱敏检查 -->
+                                    <div class="gpt-plan-card-rule-list gpt-rule-status_high">
+                                        <div class="gpt-plan-card-rule-title" onclick="toggleRule(this)">
+                                            <span class="gpt-plan-card-status">
+                                                <svg class="text-[14px] gpt-rule_success" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                    <g fill="none">
+                                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M1 8C1 4.13401 4.13401 1 8 1C11.866 1 15 4.13401 15 8C15 11.866 11.866 15 8 15C4.13401 15 1 11.866 1 8ZM11.2134 5.83751C10.9856 5.6097 10.6163 5.6097 10.3885 5.83751L6.81278 9.41166L5.30123 7.8999L5.22044 7.83241C4.9931 7.67491 4.67877 7.69741 4.47627 7.8999C4.24847 8.12771 4.24847 8.49706 4.47627 8.72486L6.40118 10.6498L6.48197 10.7173C6.70931 10.8748 7.02364 10.8523 7.22613 10.6498L11.2134 6.66247L11.2809 6.58168C11.4384 6.35433 11.4159 6.04 11.2134 5.83751Z" fill="currentColor"></path>
+                                                    </g>
+                                                </svg>
+                                                <svg class="text-[14px] gpt-rule_warning" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                    <g fill="none">
+                                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M8 1C11.866 1 15 4.13401 15 8C15 11.866 11.866 15 8 15C4.13401 15 1 11.866 1 8C1 4.13401 4.13401 1 8 1ZM8 10.3333C8.42956 10.3333 8.77778 10.6816 8.77778 11.1111C8.77778 11.5407 8.42956 11.8889 8 11.8889C7.57045 11.8889 7.22222 11.5407 7.22222 11.1111C7.22222 10.6816 7.57045 10.3333 8 10.3333ZM8 4.11111C8.32217 4.11111 8.58333 4.37228 8.58333 4.69444V8.77778C8.58333 9.09994 8.32217 9.36111 8 9.36111C7.67783 9.36111 7.41667 9.09994 7.41667 8.77778V4.69444C7.41667 4.37228 7.67783 4.11111 8 4.11111Z" fill="currentColor"></path>
+                                                    </g>
+                                                </svg>
+                                            </span>
+                                            <span class="gpt-plan-card-rule-overview">身份证号脱敏检查</span>
+                                            <i class="gpt-plan-card-rule-collapse">
+                                                <svg class="text-[14px]" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                    <g fill="none">
+                                                        <path d="M3 6.00082L7.80102 10.8L12.6 6" stroke="#999999" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                    </g>
+                                                </svg>
+                                            </i>
+                                        </div>
+                                        <div class="gpt-plan-card-rule-detail gpt-plan-card-rule-detail-close">
+                                            <div class="gpt-plan-card-rule-detail-describe">
+                                                合同中的身份证号必须脱敏处理，仅保留前4位和后4位。
+                                            </div>
+                                            <div class="gpt-plan-card_risk">
+                                                <div class="gpt-plan-card-rule-detail-header">
+                                                    <p class="gpt-plan-card-rule-detail-title">风险点:</p>
+                                                    <span class="gpt-plan-card-rule-detail-tool-icon">
+                                                        <svg class="text-[14px]" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                            <g fill="none">
+                                                                <rect x="4.80005" y="4.79999" width="9.6" height="9.6" rx="0.6" stroke="currentColor" stroke-width="1.2"></rect>
+                                                                <path d="M11.2001 2.59998V2.19998C11.2001 1.8686 10.9315 1.59998 10.6001 1.59998H2.2001C1.86873 1.59998 1.6001 1.8686 1.6001 2.19998V10.6C1.6001 10.9313 1.86873 11.2 2.2001 11.2H2.6001" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path>
+                                                            </g>
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                                <div class="gpt-plan-card-rule-detail-content">
+                                                    <div>
+                                                        <ul>
+                                                            <li>合同中发现完整身份证号码：甲方身份证号为"110101199001011234"，乙方身份证号为"110101199002022345"。根据《个人信息保护法》，应脱敏为"1101****1234"和"1101****2345"格式。</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 联系方式与银行卡脱敏检查 -->
+                                    <div class="gpt-plan-card-rule-list gpt-rule-status_high">
+                                        <div class="gpt-plan-card-rule-title" onclick="toggleRule(this)">
+                                            <span class="gpt-plan-card-status">
+                                                <svg class="text-[14px] gpt-rule_success" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                    <g fill="none">
+                                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M1 8C1 4.13401 4.13401 1 8 1C11.866 1 15 4.13401 15 8C15 11.866 11.866 15 8 15C4.13401 15 1 11.866 1 8ZM11.2134 5.83751C10.9856 5.6097 10.6163 5.6097 10.3885 5.83751L6.81278 9.41166L5.30123 7.8999L5.22044 7.83241C4.9931 7.67491 4.67877 7.69741 4.47627 7.8999C4.24847 8.12771 4.24847 8.49706 4.47627 8.72486L6.40118 10.6498L6.48197 10.7173C6.70931 10.8748 7.02364 10.8523 7.22613 10.6498L11.2134 6.66247L11.2809 6.58168C11.4384 6.35433 11.4159 6.04 11.2134 5.83751Z" fill="currentColor"></path>
+                                                    </g>
+                                                </svg>
+                                                <svg class="text-[14px] gpt-rule_warning" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                    <g fill="none">
+                                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M8 1C11.866 1 15 4.13401 15 8C15 11.866 11.866 15 8 15C4.13401 15 1 11.866 1 8C1 4.13401 4.13401 1 8 1ZM8 10.3333C8.42956 10.3333 8.77778 10.6816 8.77778 11.1111C8.77778 11.5407 8.42956 11.8889 8 11.8889C7.57045 11.8889 7.22222 11.5407 7.22222 11.1111C7.22222 10.6816 7.57045 10.3333 8 10.3333ZM8 4.11111C8.32217 4.11111 8.58333 4.37228 8.58333 4.69444V8.77778C8.58333 9.09994 8.32217 9.36111 8 9.36111C7.67783 9.36111 7.41667 9.09994 7.41667 8.77778V4.69444C7.41667 4.37228 7.67783 4.11111 8 4.11111Z" fill="currentColor"></path>
+                                                    </g>
+                                                </svg>
+                                            </span>
+                                            <span class="gpt-plan-card-rule-overview">联系方式与银行卡脱敏检查</span>
+                                            <i class="gpt-plan-card-rule-collapse">
+                                                <svg class="text-[14px]" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                    <g fill="none">
+                                                        <path d="M3 6.00082L7.80102 10.8L12.6 6" stroke="#999999" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                    </g>
+                                                </svg>
+                                            </i>
+                                        </div>
+                                        <div class="gpt-plan-card-rule-detail gpt-plan-card-rule-detail-close">
+                                            <div class="gpt-plan-card-rule-detail-describe">
+                                                合同中的手机号、银行卡号等敏感信息必须脱敏处理。
+                                            </div>
+                                            <div class="gpt-plan-card_risk">
+                                                <div class="gpt-plan-card-rule-detail-header">
+                                                    <p class="gpt-plan-card-rule-detail-title">风险点:</p>
+                                                    <span class="gpt-plan-card-rule-detail-tool-icon">
+                                                        <svg class="text-[14px]" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                                            <g fill="none">
+                                                                <rect x="4.80005" y="4.79999" width="9.6" height="9.6" rx="0.6" stroke="currentColor" stroke-width="1.2"></rect>
+                                                                <path d="M11.2001 2.59998V2.19998C11.2001 1.8686 10.9315 1.59998 10.6001 1.59998H2.2001C1.86873 1.59998 1.6001 1.8686 1.6001 2.19998V10.6C1.6001 10.9313 1.86873 11.2 2.2001 11.2H2.6001" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path>
+                                                            </g>
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                                <div class="gpt-plan-card-rule-detail-content">
+                                                    <div>
+                                                        <ul>
+                                                            <li>合同中发现未脱敏的敏感信息：甲方手机号"13812345678"、银行卡号"6222021234567890123"。应脱敏为"138****5678"和"6222****0123"格式，以保护个人隐私。</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 消息底部操作栏 -->
+                <div class="message-footer">
+                    <div class="message-footer-ai action">
+                        内容由AI生成，点击查看日志 
+                        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" class="arco-icon arco-icon-right" stroke-width="4" stroke-linecap="butt" stroke-linejoin="miter">
+                            <path d="m16 39.513 15.556-15.557L16 8.4"></path>
+                        </svg>
+                    </div>
+                    <div class="message-footer-action">
+                        <span class="action-icon">
+                            <svg class="text-[16px]" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                <g fill="none">
+                                    <path d="M9.2 6.20001V3.80001C9.2 2.80589 8.39413 2 7.4 2L5 7.40001V14H11.972C12.5704 14.0068 13.0823 13.5716 13.172 12.98L14 7.58001C14.0528 7.23191 13.9501 6.87818 13.7191 6.61251C13.4881 6.34684 13.1521 6.19601 12.8 6.20001H9.2Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"></path>
+                                    <path d="M5 7.33418H3.398C2.69511 7.32175 2.09423 7.90398 2 8.60061V12.8006C2.09423 13.4973 2.69511 14.013 3.398 14.0006H5V7.33418Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"></path>
+                                </g>
+                            </svg>
+                        </span>
+                        <span class="action-icon">
+                            <svg class="text-[16px]" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                <g fill="none">
+                                    <path d="M6.81367 10.0008V12.4008C6.81367 13.3949 7.61954 14.2008 8.61367 14.2008L11.0137 8.80076V2.20076H4.04167C3.44331 2.194 2.93137 2.62913 2.84167 3.22077L2.01367 8.62077C1.96084 8.96887 2.06354 9.3226 2.29454 9.58827C2.52557 9.85393 2.86161 10.0048 3.21367 10.0008H6.81367Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"></path>
+                                    <path d="M11.0137 8.8666H12.6157C13.3186 8.87903 13.9194 8.29679 14.0137 7.60016V3.40016C13.9194 2.70349 13.3186 2.18773 12.6157 2.20016H11.0137V8.8666Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"></path>
+                                </g>
+                            </svg>
+                        </span>
+                        <span class="action-icon">
+                            <svg class="text-[16px]" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                <g fill="none">
+                                    <path d="M14.1715 1.79993V5.57116H10.4003" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    <path d="M13.8001 10.4685C12.8423 12.7776 10.5813 14.4 7.94468 14.4C4.44066 14.4 1.6001 11.5346 1.6001 7.99998C1.6001 4.46535 4.44066 1.59998 7.94468 1.59998C10.4485 1.59998 12.6136 3.06302 13.6456 5.18785" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path>
+                                </g>
+                            </svg>
+                        </span>
+                        <span class="action-icon">
+                            <svg class="text-[16px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="1em" height="1em" fill="currentColor">
+                                <g fill="none">
+                                    <path d="M5.94763 6.75244L11.1141 3.70557" stroke="#999" stroke-width="1.2"></path>
+                                    <path d="M5.94763 9.24756L11.1141 12.2944" stroke="#999" stroke-width="1.2"></path>
+                                    <path stroke="#999" stroke-width="1.2" d="M12.4526 1.36853A1.54734 1.54734 0 1 0 12.4526 4.46321A1.54734 1.54734 0 1 0 12.4526 1.36853Z"></path>
+                                    <path stroke="#999" stroke-width="1.2" d="M12.4526 11.53676A1.54734 1.54734 0 1 0 12.4526 14.63144A1.54734 1.54734 0 1 0 12.4526 11.53676Z"></path>
+                                    <path stroke="#999" stroke-width="1.2" d="M3.83169 5.568479999999999A2.43154 2.43154 0 1 0 3.83169 10.43156A2.43154 2.43154 0 1 0 3.83169 5.568479999999999Z"></path>
+                                </g>
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 底部滚动按钮 -->
+        <div class="height-0 relative flex w-full items-center justify-center">
+            <span class="absolute bottom-[16px] flex h-[36px] w-[36px] cursor-pointer items-center justify-center gap-[4px] rounded-[40px] border-[1px] border-solid border-[#EAEAEA] bg-[#FFF] px-[8px] py-[4px] text-[#999999] [box-shadow:0_4px_10px_0_#0000001a] hover:text-[#266EFF]">
+                <svg class="text-[18px]" width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                    <g fill="none">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M7.57573 9.02425C7.81004 9.25856 8.18994 9.25856 8.42426 9.02425L12.4243 5.02425C12.6586 4.78993 12.6586 4.41003 12.4243 4.17572C12.1899 3.9414 11.81 3.9414 11.5757 4.17572L7.99999 7.75145L4.42426 4.17572C4.18994 3.9414 3.81004 3.9414 3.57573 4.17572C3.34142 4.41003 3.34142 4.78993 3.57573 5.02425L7.57573 9.02425Z" fill="currentColor"></path>
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M3.39999 11.4C3.39999 11.7314 3.66862 12 3.99999 12H12C12.3314 12 12.6 11.7314 12.6 11.4C12.6 11.0687 12.3314 10.8 12 10.8H3.99999C3.66862 10.8 3.39999 11.0687 3.39999 11.4Z" fill="currentColor"></path>
+                    </g>
+                </svg>
+            </span>
+        </div>
+        
+        <div class="gpt-action-bar"></div>
+        
+        <!-- 工具栏 -->
+        <div class="tool-bar">
+            <div class="tool-bar-item skill">
+                <svg width="16px" height="16px" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14.4752 13.266L7.40819 7.0057C7.05034 7.04002 6.71171 7.18299 6.43813 7.41527C6.16455 7.64754 5.96921 7.9579 5.87856 8.30436L12.2485 15.4724L12.3798 15.6031C12.573 15.7744 12.8055 15.8956 13.0569 15.9561C13.3082 16.0166 13.5707 16.0145 13.821 15.95C14.0714 15.8855 14.3019 15.7606 14.4923 15.5863C14.6826 15.412 14.827 15.1937 14.9125 14.9507C15.0147 14.6582 15.0277 14.3421 14.9498 14.0423C14.8718 13.7424 14.7065 13.4723 14.4745 13.266H14.4752ZM3.85162 7.70963C4.29654 8.424 4.71562 8.30436 4.77359 7.48565C4.81543 7.07234 5.00416 6.68751 5.30575 6.40055C5.60735 6.11358 6.00197 5.94337 6.41847 5.92059C7.26151 5.89415 7.38235 5.48237 6.68528 5.01215C6.34799 4.76711 6.10981 4.41003 6.01374 4.00541C5.91767 3.60078 5.97006 3.17528 6.16144 2.80576C6.55956 2.06496 6.26621 1.76238 5.50139 2.122C5.11673 2.29905 4.68062 2.33107 4.27405 2.21209C3.86749 2.09312 3.51809 1.83124 3.29076 1.4751C2.84584 0.760736 2.43165 0.865073 2.36879 1.69978C2.32695 2.11309 2.13822 2.49792 1.83662 2.78488C1.53502 3.07185 1.1404 3.24206 0.723906 3.26484C-0.124725 3.30101 -0.244861 3.7135 0.457094 4.18302C0.794384 4.42806 1.03257 4.78513 1.12864 5.18976C1.22471 5.59439 1.17232 6.01988 0.980941 6.38941C0.582817 7.13091 0.876171 7.43279 1.64099 7.07317C2.02446 6.89515 2.45971 6.86154 2.86615 6.97856C3.27259 7.09557 3.62269 7.3553 3.85162 7.70963ZM8.51875 4.05781L9.2207 4.30266C9.43929 4.37895 9.63698 4.50502 9.79801 4.67082C9.95904 4.83662 10.079 5.03758 10.1483 5.25769L10.3732 5.96719C10.3944 6.01902 10.4306 6.06338 10.4773 6.0946C10.5239 6.12582 10.5789 6.1425 10.6351 6.1425C10.6913 6.1425 10.7462 6.12582 10.7929 6.0946C10.8395 6.06338 10.8758 6.01902 10.897 5.96719L11.1429 5.26813C11.2195 5.05044 11.3461 4.85357 11.5126 4.6932C11.679 4.53283 11.8808 4.41339 12.1019 4.34439L12.8248 4.13085C12.8768 4.1097 12.9214 4.0736 12.9527 4.02714C12.9841 3.98068 13.0008 3.92598 13.0008 3.87C13.0008 3.81403 12.9841 3.75932 12.9527 3.71286C12.9214 3.6664 12.8768 3.6303 12.8248 3.60916L12.1228 3.36362C11.9043 3.28739 11.7067 3.16143 11.5456 2.99575C11.3846 2.83007 11.2646 2.62925 11.1953 2.40927L11.0018 1.70464C10.9806 1.65282 10.9443 1.60846 10.8976 1.57724C10.851 1.54601 10.7961 1.52934 10.7399 1.52934C10.6837 1.52934 10.6287 1.54601 10.5821 1.57724C10.5354 1.60846 10.4992 1.65282 10.4779 1.70464L10.2321 2.40371C10.1555 2.6214 10.0289 2.81827 9.86239 2.97864C9.6959 3.13901 9.49411 3.25845 9.27309 3.32745L8.56066 3.55142C8.50861 3.57257 8.46407 3.60867 8.43272 3.65513C8.40137 3.70159 8.38462 3.75629 8.38462 3.81227C8.38462 3.86824 8.40137 3.92295 8.43272 3.96941C8.46407 4.01587 8.50861 4.05197 8.56066 4.07311L8.51875 4.05781ZM5.5433 11.2314L4.92027 11.0123C4.72653 10.9447 4.55128 10.8331 4.40845 10.6862C4.26562 10.5394 4.15915 10.3614 4.09748 10.1664L3.89842 9.54041C3.88156 9.49082 3.84952 9.44773 3.8068 9.41721C3.76407 9.38669 3.71282 9.37028 3.66024 9.37028C3.60767 9.37028 3.55641 9.38669 3.51369 9.41721C3.47096 9.44773 3.43892 9.49082 3.42207 9.54041L3.20205 10.1616C3.13268 10.3509 3.0205 10.5219 2.8742 10.6612C2.72789 10.8005 2.55138 10.9044 2.35831 10.965L1.72969 11.1632C1.67964 11.1798 1.63611 11.2117 1.60526 11.2544C1.57441 11.297 1.55781 11.3482 1.55781 11.4008C1.55781 11.4533 1.57441 11.5045 1.60526 11.5471C1.63611 11.5898 1.67964 11.6217 1.72969 11.6383L2.35342 11.8574C2.54112 11.929 2.70992 12.0424 2.84695 12.1889C2.98397 12.3353 3.0856 12.511 3.14408 12.7025L3.34314 13.3286C3.35984 13.3784 3.39186 13.4218 3.43467 13.4525C3.47747 13.4832 3.5289 13.4997 3.58167 13.4997C3.63443 13.4997 3.68586 13.4832 3.72867 13.4525C3.77147 13.4218 3.80349 13.3784 3.82019 13.3286L4.04021 12.7074C4.10808 12.5147 4.22011 12.3403 4.36741 12.1982C4.51472 12.0561 4.69325 11.9501 4.88884 11.8887L5.51745 11.6905C5.56751 11.6738 5.61104 11.642 5.64189 11.5993C5.67273 11.5567 5.68933 11.5055 5.68933 11.4529C5.68933 11.4004 5.67273 11.3492 5.64189 11.3065C5.61104 11.2639 5.56751 11.232 5.51745 11.2154L5.5433 11.2314Z" fill="url(#paint0_linear_6787ea4d-68a3-4907-810a-524bfe385730)"></path>
+                    <defs>
+                        <linearGradient id="paint0_linear_6787ea4d-68a3-4907-810a-524bfe385730" x1="4.82765e-08" y1="8.35484" x2="15" y2="8.35484" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#5C8AFF"></stop>
+                            <stop offset="1" stop-color="#786CFF"></stop>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <div class="selected-skill-title">技能</div>
+                <div class="selected-skill" title="GYJ_测试_合同审核">
+                    <span class="selected-skill_name">GYJ_测试_合同审核</span>
+                    <span class="guide">
+                        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" class="arco-icon arco-icon-question-circle" stroke-width="4" stroke-linecap="butt" stroke-linejoin="miter">
+                            <path d="M42 24c0 9.941-8.059 18-18 18S6 33.941 6 24 14.059 6 24 6s18 8.059 18 18Z"></path>
+                            <path d="M24.006 31v4.008m0-6.008L24 28c0-3 3-4 4.78-6.402C30.558 19.195 28.288 15 23.987 15c-4.014 0-5.382 2.548-5.388 4.514v.465"></path>
+                        </svg>
+                    </span>
+                </div>
+            </div>
+            <div class="tool-bar-item btn">
+                <div class="btn-clear">
+                    <svg class="text-[30px]" width="1em" height="1em" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                        <g id="清理记忆" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                            <path d="M16.33333,7 C16.74753,7 17.08333,7.33579 17.08333,7.75 L17.08333,10.33339 L22.58333,10.33339 C22.99753,10.33339 23.33333,10.66909 23.33333,11.08339 L23.33333,14.41669 C23.33333,14.83089 22.99753,15.16669 22.58333,15.16669 L22.08333,15.16669 L22.08333,21.95249 C22.08333,22.36669 21.74753,22.70249 21.33333,22.70249 L8,22.70249 C7.58579,22.70249 7.25,22.36669 7.25,21.95249 L7.25,15.16669 L6.75,15.16669 C6.33579,15.16669 6,14.83089 6,14.41669 L6,11.08339 C6,10.66909 6.33579,10.33339 6.75,10.33339 L12.25003,10.33339 L12.25003,7.75 C12.25003,7.33579 12.58583,7 13.00003,7 L16.33333,7 Z M20.58333,15.20249 L8.75,15.20249 L8.75,21.20249 L10.58323,21.20249 L10.58323,19.41669 C10.58323,19.00249 10.91903,18.66669 11.33323,18.66669 C11.74743,18.66669 12.08323,19.00249 12.08323,19.41669 L12.08323,21.20249 L13.91663,21.20249 L13.91663,19.40989 C13.91663,18.99559 14.25243,18.65989 14.66663,18.65989 C15.08083,18.65989 15.41663,18.99559 15.41663,19.40989 L15.41663,21.20249 L17.25003,21.20249 L17.25003,19.41669 C17.25003,19.00249 17.58583,18.66669 18.00003,18.66669 C18.41423,18.66669 18.75003,19.00249 18.75003,19.41669 L18.75003,21.20249 L20.58333,21.20249 L20.58333,15.20249 Z M15.58333,8.5 L13.75003,8.5 L13.75003,11.08339 C13.75003,11.49759 13.41423,11.83339 13.00003,11.83339 L7.5,11.83339 L7.5,13.66669 L21.83333,13.66669 L21.83333,11.83339 L16.33333,11.83339 C15.91913,11.83339 15.58333,11.49759 15.58333,11.08339 L15.58333,8.5 Z" id="形状" fill="currentColor"></path>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 输入框区域 -->
+        <label for="message-input" class="">
+            <div class="input-area">
+                <div class="input-area-back">
+                    <div class="input-row">
+                        <textarea id="message-input" type="text" placeholder="你好，我是你的助手" rows="1" style="height: 18px;"></textarea>
+                        <button class="input-send" title="Ctrl + Enter">
+                            <svg class="text-[16px]" width="1em" height="1em" viewBox="0 0 16 18" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                <g fill="none">
+                                    <path d="M15.8017 9.89713C15.6403 10.2837 15.3653 10.5902 15.0358 10.7745L2.57972 17.7939C1.69604 18.2763 0.629685 17.8829 0.181216 16.9164C-0.016202 16.4497 -0.0562335 15.923 0.0804289 15.4316L1.44271 10.48C1.56743 10.0266 1.9425 9.71715 2.3673 9.71715H7.13486C7.48528 9.71557 7.77183 9.39946 7.77982 8.99722C7.77761 8.60121 7.4946 8.28113 7.13486 8.27729H2.37082C1.94434 8.27729 1.56819 7.96542 1.44486 7.50957L0.100586 2.54032C-0.180673 1.50392 0.350259 0.398527 1.28976 0.0880482C1.72463 -0.0645862 2.19505 -0.0182644 2.59986 0.223048L15.0358 7.24237C15.9045 7.7378 16.2541 8.92989 15.8017 9.89713Z" fill="#ffffff"></path>
+                                    <defs>
+                                        <linearGradient id="paint0_linear_22_3116" x1="5.14951e-08" y1="8.27419" x2="16" y2="8.27419" gradientUnits="userSpaceOnUse">
+                                            <stop stop-color="#5C8AFF"></stop>
+                                            <stop offset="1" stop-color="#786CFF"></stop>
+                                        </linearGradient>
+                                    </defs>
+                                </g>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </label>
+    </div>
+
+    <script>
+    // 切换规则组展开/收起
+    function toggleGroup(element) {
+        const rulesContainer = element.parentElement.querySelector('.gpt-plan-card-rules');
+        const icon = element.querySelector('.gpt-plan-card-group--header-icon svg');
+        
+        if (rulesContainer.style.display === 'none') {
+            rulesContainer.style.display = 'block';
+            icon.style.transform = 'rotate(0deg)';
+        } else {
+            rulesContainer.style.display = 'none';
+            icon.style.transform = 'rotate(-90deg)';
+        }
+    }
+    
+    // 切换规则详情展开/收起
+    function toggleRule(element) {
+        const ruleDetail = element.parentElement.querySelector('.gpt-plan-card-rule-detail');
+        const collapseIcon = element.querySelector('.gpt-plan-card-rule-collapse svg');
+        
+        if (ruleDetail.classList.contains('gpt-plan-card-rule-detail-close')) {
+            ruleDetail.classList.remove('gpt-plan-card-rule-detail-close');
+            ruleDetail.style.display = 'block';
+            collapseIcon.style.transform = 'rotate(180deg)';
+        } else {
+            ruleDetail.classList.add('gpt-plan-card-rule-detail-close');
+            ruleDetail.style.display = 'none';
+            collapseIcon.style.transform = 'rotate(0deg)';
+        }
+    }
+    
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', function() {
+        // 默认收起所有规则详情
+        const ruleDetails = document.querySelectorAll('.gpt-plan-card-rule-detail');
+        ruleDetails.forEach(detail => {
+            detail.style.display = 'none';
+        });
+        
+        // 默认展开所有规则组
+        const rulesContainers = document.querySelectorAll('.gpt-plan-card-rules');
+        rulesContainers.forEach(container => {
+            container.style.display = 'block';
+        });
+    });
+</script>
+
+</body>
+</html>

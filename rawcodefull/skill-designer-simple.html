@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技能编排 - 合同审核系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #fff;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 头部样式 */
+        .header {
+            height: 60px;
+            background: #F7F8FC;
+            border-bottom: 1px solid #EAEAEA;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            max-width: calc(100% - 320px);
+        }
+        
+        .back-btn {
+            width: 16px;
+            height: 16px;
+            margin-right: 12px;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+        
+        .back-btn:hover {
+            opacity: 1;
+        }
+        
+        .title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .edit-btn {
+            width: 16px;
+            height: 16px;
+            margin-left: 8px;
+            cursor: pointer;
+            color: #A0A5AC;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+        
+        .shortcut-tip {
+            font-size: 13px;
+            color: #999;
+            margin-right: 16px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .save-btn {
+            padding: 8px 16px;
+            background: #266EFF;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+        
+        .save-btn:hover {
+            background: #1E5CE6;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            height: calc(100% - 60px);
+        }
+        
+        /* 左侧工具栏 */
+        .toolbar {
+            width: 64px;
+            background: white;
+            border-right: 1px solid #EAEAEA;
+            overflow-y: auto;
+        }
+        
+        .tool-item {
+            height: 64px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+            gap: 4px;
+        }
+        
+        .tool-item:hover {
+            background: #F2F4F6;
+        }
+        
+        .tool-icon {
+            width: 20px;
+            height: 20px;
+            color: #A0A5AC;
+        }
+        
+        .tool-name {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .divider {
+            height: 1px;
+            background: #EAEAEA;
+            margin: 8px 0;
+        }
+        
+        /* 中间画布 */
+        .canvas {
+            flex: 1;
+            background: #F3F4F9;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .flow-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .flow-node {
+            position: absolute;
+            width: 160px;
+            background: white;
+            border: 1px solid #EAEAEA;
+            border-radius: 4px;
+            padding: 10px 12px;
+            cursor: move;
+            user-select: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        .flow-node.active {
+            border-color: #266EFF;
+            box-shadow: 0 0 0 2px rgba(38, 110, 255, 0.2);
+        }
+        
+        .flow-node:hover {
+            border-color: #266EFF;
+        }
+        
+        .node-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+        
+        .node-icon {
+            width: 20px;
+            height: 20px;
+            color: #1CC78D;
+        }
+        
+        .node-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .node-desc {
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .node-menu {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 16px;
+            height: 16px;
+            color: #A0A5AC;
+            cursor: pointer;
+        }
+        
+        .connection-line {
+            stroke: #B1B1B7;
+            stroke-width: 2;
+            fill: none;
+            marker-end: url(#arrowhead);
+        }
+        
+        /* 右侧属性面板 */
+        .properties {
+            width: 40%;
+            background: white;
+            border-left: 1px solid #EAEAEA;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .prop-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+        
+        .prop-group {
+            margin-bottom: 20px;
+        }
+        
+        .prop-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .prop-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .prop-input:focus {
+            border-color: #266EFF;
+        }
+        
+        .prop-textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .prop-textarea:focus {
+            border-color: #266EFF;
+        }
+        
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+        
+        /* 预览按钮 */
+        .preview-btn {
+            position: absolute;
+            right: 0;
+            top: 20px;
+            width: 48px;
+            background: linear-gradient(90deg, #5C8AFF 0%, #786CFF 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 6px 4px;
+            border-radius: 8px 0 0 8px;
+            cursor: pointer;
+            box-shadow: -4px 0 6px -6px rgba(0, 0, 0, 0.06);
+            transition: opacity 0.2s;
+        }
+        
+        .preview-btn:hover {
+            opacity: 0.9;
+        }
+        
+        .preview-icon {
+            width: 16px;
+            height: 16px;
+            margin-bottom: 4px;
+        }
+        
+        .preview-text {
+            font-size: 12px;
+            writing-mode: vertical-rl;
+            letter-spacing: 4px;
+        }
+        
+        /* 文件上传部分 */
+        .file-upload-section {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #EAEAEA;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .section-title {
+            font-weight: 500;
+        }
+        
+        .switch {
+            position: relative;
+            width: 40px;
+            height: 22px;
+            background: #ddd;
+            border-radius: 11px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .switch.active {
+            background: #266EFF;
+        }
+        
+        .switch-handle {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .switch.active .switch-handle {
+            transform: translateX(18px);
+        }
+        
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+        }
+        
+        .checkbox-item label {
+            font-size: 13px;
+            color: #333;
+        }
+        
+        .alert {
+            background: #F0F7FF;
+            border: 1px solid #BAE7FF;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin: 12px 0;
+            font-size: 13px;
+            color: #266EFF;
+        }
+        
+        .number-input {
+            width: 120px;
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <!-- 头部 -->
+            <div class="header">
+                <div class="header-left">
+                    <svg class="back-btn" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                    </svg>
+                    <span class="title" :title="skillName">{{ skillName }}</span>
+                    <svg class="edit-btn" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                    </svg>
+                </div>
+                <div class="header-right">
+                    <div class="shortcut-tip">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="margin-right: 4px;">
+                            <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                            <path d="M4.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM4.002 11a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM8.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM8.002 11a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM13 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM13 11a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                        </svg>
+                        快捷保存: Ctrl+S
+                    </div>
+                    <button class="save-btn" @click="saveSkill">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z"/>
+                        </svg>
+                        保存
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 主内容区 -->
+            <div class="main-content">
+                <!-- 左侧工具栏 -->
+                <div class="toolbar">
+                    <div class="tool-item" draggable="true" @dragstart="dragStart($event, 'prompt')">
+                        <svg class="tool-icon" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                        </svg>
+                        <span class="tool-name">提示词</span>
+                    </div>
+                    <div class="tool-item" draggable="true" @dragstart="dragStart($event, 'knowledge')">
+                        <svg class="tool-icon" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M0 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm6.5 4.5v3.003L9 8.5l.002-.5H8.5v2h1.002l.5-.5.5.5v-2l-.5.5H10v-.5l-1.5-.5-2.5 1.5v-3l2.5-1.5 2.5 1.5z"/>
+                        </svg>
+                        <span class="tool-name">知识库</span>
+                    </div>
+                    <div class="tool-item" draggable="true" @dragstart="dragStart($event, 'smart-check')">
+                        <svg class="tool-icon" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                        </svg>
+                        <span class="tool-name">智能检查</span>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="tool-item" draggable="true" @dragstart="dragStart($event, 'message')">
+                        <svg class="tool-icon" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414L2 15.586V2a1 1 0 0 1 1-1h11zM2 0a2 2 0 0 0-2 2v15.5a.5.5 0 0 0 .854.354l3-3A2 2 0 0 1 4.414 14H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                        </svg>
+                        <span class="tool-name">消息卡片</span>
+                    </div>
+                    <div class="tool-item" draggable="true" @dragstart="dragStart($event, 'interactive')">
+                        <svg class="tool-icon" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M2 3.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm.5 3a.5.5 0 0 0 0 1h11a.5.5 0 0 0 0-1h-11zm0 3a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1h-6zm0 3a.5.5 0 0 0 0 1h11a.5.5 0 0 0 0-1h-11z"/>
+                        </svg>
+                        <span class="tool-name">交互卡片</span>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="tool-item" draggable="true" @dragstart="dragStart($event, 'selector')">
+                        <svg class="tool-icon" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                        </svg>
+                        <span class="tool-name">选择器</span>
+                    </div>
+                </div>
+                
+                <!-- 中间画布 -->
+                <div class="canvas" @dragover.prevent @drop="drop($event)">
+                    <svg width="100%" height="100%" style="position: absolute; top: 0; left: 0;">
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#B1B1B7"/>
+                            </marker>
+                        </defs>
+                        <!-- 连接线 -->
+                        <path v-for="line in connections" :key="line.id" class="connection-line" :d="line.d"/>
+                    </svg>
+                    
+                    <div class="flow-container">
+                        <div v-for="node in nodes" :key="node.id" 
+                             class="flow-node" 
+                             :class="{ active: selectedNode === node.id }"
+                             :style="{ left: node.x + 'px', top: node.y + 'px' }"
+                             @mousedown="startDrag($event, node.id)"
+                             @click="selectNode(node.id)">
+                            <div class="node-header">
+                                <svg class="node-icon" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                </svg>
+                                <span class="node-title">{{ node.title }}</span>
+                            </div>
+                            <div class="node-desc">{{ node.desc }}</div>
+                            <svg class="node-menu" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <!-- 预览按钮 -->
+                    <div class="preview-btn">
+                        <svg class="preview-icon" viewBox="0 0 16 16" fill="white">
+                            <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                            <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                        </svg>
+                        <span class="preview-text">预览</span>
+                    </div>
+                </div>
+                
+                <!-- 右侧属性面板 -->
+                <div class="properties">
+                    <h2 class="prop-title">技能配置</h2>
+                    
+                    <div class="prop-group">
+                        <label class="prop-label">技能名称</label>
+                        <input type="text" class="prop-input" v-model="skillName" placeholder="请输入技能名称">
+                    </div>
+                    
+                    <div class="prop-group">
+                        <label class="prop-label">技能描述</label>
+                        <textarea class="prop-textarea" v-model="skillDescription" placeholder="请输入技能描述"></textarea>
+                    </div>
+                    
+                    <div class="prop-group">
+                        <label class="prop-label">输出参数格式</label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" v-model="outputFormat" value="content">
+                                <span>纯文本</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" v-model="outputFormat" value="variables">
+                                <span>参数列表</span>
+                            </label>
+                        </div>
+                        <p class="help-text">
+                            纯文本：用户提问的原始文本。<br>
+                            参数列表：通过AI分析用户输入中的参数信息，可以为这些参数定义名称、类型、是否必填，描述，从而让AI提取得更加准确。
+                        </p>
+                    </div>
+                    
+                    <!-- 文件上传设置 -->
+                    <div class="file-upload-section">
+                        <div class="section-header">
+                            <span class="section-title">文件上传</span>
+                            <div class="switch" :class="{ active: fileUploadEnabled }" @click="fileUploadEnabled = !fileUploadEnabled">
+                                <div class="switch-handle"></div>
+                            </div>
+                        </div>
+                        
+                        <div v-if="fileUploadEnabled">
+                            <div class="prop-group">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" v-model="mobileUpload">
+                                    <span>移动端上传</span>
+                                </label>
+                            </div>
+                            
+                            <div class="alert">
+                                word、pdf、txt 文件已支持文档分析，其他类型文档可通过插件自定义分析文档。
+                            </div>
+                            
+                            <div class="prop-group">
+                                <label class="prop-label">可传文件类型</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" v-model="fileTypes" value="doc,docx">
+                                        <span>Word文档</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" v-model="fileTypes" value="pdf">
+                                        <span>PDF文件</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" v-model="fileTypes" value="txt">
+                                        <span>文本文件</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" v-model="fileTypes" value="jpg,png">
+                                        <span>图片文件</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="prop-group">
+                                <label class="prop-label">允许上传文件数</label>
+                                <input type="number" class="number-input" v-model="fileMaxCount" min="1" max="10">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const { createApp, ref, reactive } = Vue;
+        
+        createApp({
+            setup() {
+                // 数据
+                const skillName = ref('GYJ_测试_合同审核');
+                const skillDescription = ref('');
+                const outputFormat = ref('content');
+                const fileUploadEnabled = ref(false);
+                const mobileUpload = ref(false);
+                const fileTypes = ref(['doc,docx', 'pdf']);
+                const fileMaxCount = ref(1);
+                
+                // 节点数据
+                const nodes = ref([
+                    { id: 1, x: 100, y: 100, title: '开始', desc: '步骤一：开始' },
+                    { id: 2, x: 100, y: 200, title: '智能检查', desc: '步骤二：智能检查_0' },
+                    { id: 3, x: 100, y: 300, title: '结束', desc: '结束步骤：完成执行动作' }
+                ]);
+                
+                const connections = ref([
+                    { id: 'c1', d: 'M 180 150 L 180 200' },
+                    { id: 'c2', d: 'M 180 250 L 180 300' }
+                ]);
+                
+                const selectedNode = ref(null);
+                
+                // 拖拽相关
+                let dragType = '';
+                let draggingNode = null;
+                let dragOffset = { x: 0, y: 0 };
+                
+                const dragStart = (e, type) => {
+                    dragType = type;
+                    e.dataTransfer.effectAllowed = 'copy';
+                };
+                
+                const drop = (e) => {
+                    e.preventDefault();
+                    if (dragType) {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const x = e.clientX - rect.left - 80;
+                        const y = e.clientY - rect.top - 25;
+                        
+                        const newNode = {
+                            id: Date.now(),
+                            x: Math.max(0, x),
+                            y: Math.max(0, y),
+                            title: getToolName(dragType),
+                            desc: '新节点'
+                        };
+                        
+                        nodes.value.push(newNode);
+                    }
+                    dragType = '';
+                };
+                
+                const getToolName = (type) => {
+                    const names = {
+                        'prompt': '提示词',
+                        'knowledge': '知识库',
+                        'smart-check': '智能检查',
+                        'message': '消息卡片',
+                        'interactive': '交互卡片',
+                        'selector': '选择器'
+                    };
+                    return names[type] || type;
+                };
+                
+                const startDrag = (e, nodeId) => {
+                    draggingNode = nodeId;
+                    const node = nodes.value.find(n => n.id === nodeId);
+                    dragOffset.x = e.clientX - node.x;
+                    dragOffset.y = e.clientY - node.y;
+                    
+                    document.addEventListener('mousemove', onDrag);
+                    document.addEventListener('mouseup', stopDrag);
+                };
+                
+                const onDrag = (e) => {
+                    if (draggingNode) {
+                        const node = nodes.value.find(n => n.id === draggingNode);
+                        node.x = e.clientX - dragOffset.x;
+                        node.y = e.clientY - dragOffset.y;
+                        
+                        // 更新连接线
+                        updateConnections();
+                    }
+                };
+                
+                const stopDrag = () => {
+                    draggingNode = null;
+                    document.removeEventListener('mousemove', onDrag);
+                    document.removeEventListener('mouseup', stopDrag);
+                };
+                
+                const selectNode = (nodeId) => {
+                    selectedNode.value = nodeId;
+                };
+                
+                const updateConnections = () => {
+                    // 简单的连接线更新逻辑
+                    if (nodes.value.length >= 2) {
+                        const node1 = nodes.value[0];
+                        const node2 = nodes.value[1];
+                        connections.value[0].d = `M ${node1.x + 80} ${node1.y + 50} L ${node2.x + 80} ${node2.y}`;
+                        
+                        if (nodes.value.length >= 3) {
+                            const node3 = nodes.value[2];
+                            connections.value[1].d = `M ${node2.x + 80} ${node2.y + 50} L ${node3.x + 80} ${node3.y}`;
+                        }
+                    }
+                };
+                
+                const saveSkill = () => {
+                    alert('保存成功！');
+                };
+                
+                return {
+                    skillName,
+                    skillDescription,
+                    outputFormat,
+                    fileUploadEnabled,
+                    mobileUpload,
+                    fileTypes,
+                    fileMaxCount,
+                    nodes,
+                    connections,
+                    selectedNode,
+                    dragStart,
+                    drop,
+                    selectNode,
+                    saveSkill
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

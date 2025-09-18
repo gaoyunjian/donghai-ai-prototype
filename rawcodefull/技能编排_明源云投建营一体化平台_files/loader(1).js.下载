@@ -1,0 +1,1 @@
+;(function(){var s = new URL(import.meta.url);s.searchParams.set("source", "loader");var i;i = document.createElement('script');i.setAttribute('type','module');i.setAttribute('crossorigin','');i.setAttribute('src',s.href.replace('/gptbuilder/assistant/loader.js', '/gptbuilder/assistant/assets/index-65_nHs0D.js'));document.head.appendChild(i);})();
