@@ -64,6 +64,21 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .section-title:hover {
+            background: #f8f9fa;
+            border-radius: 4px;
+            padding: 8px;
+            margin: -8px;
+            margin-bottom: 8px;
+        }
+        .section-content {
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        .section-content.collapsed {
+            display: none;
         }
         .section-icon {
             width: 20px;
@@ -413,10 +428,11 @@
                 <strong>AI检查结果：不通过</strong>
             </div>
             
-            <div class="section-title">
-                <div class="section-icon">▼</div>
+            <div class="section-title" onclick="toggleSection('ip-section')" style="cursor: pointer;">
+                <div class="section-icon" id="ip-section-icon">▼</div>
                 IP雷同性检查
             </div>
+            <div class="section-content" id="ip-section">
             
             <div class="rule-item" data-rule-id="rule-1">
                 <div class="rule-header">
@@ -453,11 +469,13 @@
                     </div>
                 </div>
             </div>
+            </div>
 
-            <div class="section-title">
-                <div class="section-icon">▼</div>
+            <div class="section-title" onclick="toggleSection('bidder-section')" style="cursor: pointer;">
+                <div class="section-icon" id="bidder-section-icon">▼</div>
                 投标人关系检查
             </div>
+            <div class="section-content" id="bidder-section">
             
             <div class="rule-item" data-rule-id="rule-2">
                 <div class="rule-header">
@@ -530,11 +548,13 @@
                     </div>
                 </div>
             </div>
+            </div>
 
-            <div class="section-title">
-                <div class="section-icon">▼</div>
+            <div class="section-title" onclick="toggleSection('finance-section')" style="cursor: pointer;">
+                <div class="section-icon" id="finance-section-icon">▼</div>
                 财务规则
             </div>
+            <div class="section-content" id="finance-section">
             
             <div class="rule-item" data-rule-id="rule-4">
                 <div class="rule-header">
@@ -600,11 +620,13 @@
                     </div>
                 </div>
             </div>
+            </div>
 
-            <div class="section-title">
-                <div class="section-icon">▼</div>
+            <div class="section-title" onclick="toggleSection('clause-section')" style="cursor: pointer;">
+                <div class="section-icon" id="clause-section-icon">▼</div>
                 条款规则
             </div>
+            <div class="section-content" id="clause-section">
             
             <div class="rule-item" data-rule-id="rule-6">
                 <div class="rule-header">
@@ -640,6 +662,7 @@
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     </div>
@@ -684,10 +707,32 @@
     let hideTooltipTimer = null;
 
     /**
+     * 分类折叠/展开功能
+     */
+    function toggleSection(sectionId) {
+        const sectionContent = document.getElementById(sectionId);
+        const sectionIcon = document.getElementById(sectionId + '-icon');
+        
+        if (!sectionContent || !sectionIcon) return;
+        
+        const isCollapsed = sectionContent.classList.contains('collapsed');
+        
+        if (isCollapsed) {
+            // 展开
+            sectionContent.classList.remove('collapsed');
+            sectionIcon.textContent = '▼';
+        } else {
+            // 收起
+            sectionContent.classList.add('collapsed');
+            sectionIcon.textContent = '▶';
+        }
+    }
+
+    /**
      * 折叠/展开卡片功能
      */
     function toggleCollapse(ruleId) {
-        const ruleItem = document.getElementById(ruleId);
+        const ruleItem = document.querySelector(`[data-rule-id="${ruleId}"]`);
         if (!ruleItem) return;
         
         const ruleBody = ruleItem.querySelector('.rule-body');
