@@ -403,17 +403,19 @@
             text-align: right; 
         }
         .edit-btn { 
-            background: none; 
-            border: none; 
-            color: #ffc107; 
+            background: #f8f9fa; 
+            border: 1px solid #007bff; 
+            color: #007bff; 
             cursor: pointer; 
             font-size: 12px; 
             padding: 4px 8px; 
             border-radius: 4px; 
-            transition: background 0.2s ease; 
+            font-weight: normal;
+            transition: all 0.2s ease; 
         }
         .edit-btn:hover { 
-            background: rgba(255, 193, 7, 0.1); 
+            background: #007bff; 
+            color: white;
         }
     </style>
 </head>
@@ -824,11 +826,19 @@
     }
     function rejectRule(ruleId, event) {
         event.stopPropagation();
-        currentRuleId = ruleId;
-        resetPresetTabs();
-        document.getElementById('reasonInput').value = '';
-        const popover = document.getElementById('rejectPopover');
-        showAndPositionPopover(popover, event.target);
+        
+        // 直接完成拒绝标记，不弹窗
+        const ruleItem = document.querySelector(`[data-rule-id="${ruleId}"]`);
+        ruleItem.querySelector('.feedback-buttons').style.display = 'none';
+        ruleItem.querySelector('.feedback-status.accepted').style.display = 'none';
+        ruleItem.querySelector('.feedback-status.rejected').style.display = 'flex';
+        
+        // 保存反馈数据（无原因）
+        feedbackData[ruleId] = { 
+            status: 'rejected', 
+            reason: '', 
+            timestamp: new Date().toISOString() 
+        };
     }
     function editReason(event) {
         event.stopPropagation();
@@ -911,6 +921,58 @@
         resetPresetTabs();
     }
 
+    // 快速添加原因函数
+    function quickAddReason(event) {
+        event.stopPropagation();
+        
+        // 获取当前规则ID
+        const ruleId = currentEditRuleId;
+        if (!ruleId) return;
+        
+        // 获取tooltip元素作为定位参考（与editReason保持一致）
+        const tooltip = document.getElementById('tooltip');
+        
+        hideTooltip();
+        
+        // 设置全局变量供弹窗使用
+        currentRuleId = ruleId;
+        
+        // 直接打开编辑弹窗
+        const popover = document.getElementById('rejectPopover');
+        if (!popover) return;
+        
+        // 设置为编辑模式
+        popover.querySelector('.popover-header').textContent = '添加不接受原因';
+        const confirmBtn = popover.querySelector('.popover-btn.primary');
+        confirmBtn.textContent = '保存';
+        confirmBtn.setAttribute('onclick', 'confirmQuickAdd()');
+        
+        // 清空之前的选择
+        resetPresetTabs();
+        popover.querySelector('#reasonInput').value = '';
+        
+        // 显示弹窗，使用tooltip作为定位参考（与editReason保持一致）
+        showAndPositionPopover(popover, tooltip);
+    }
+    
+    // 确认快速添加
+    function confirmQuickAdd() {
+        const customReason = document.getElementById('reasonInput').value.trim();
+        let reasons = [...selectedReasons];
+        if (customReason) {
+            reasons.push(customReason);
+        }
+        const reasonText = reasons.length > 0 ? reasons.join('；') : '未说明原因';
+        
+        // 更新反馈数据
+        if (feedbackData[currentRuleId]) {
+            feedbackData[currentRuleId].reason = reasonText;
+            feedbackData[currentRuleId].timestamp = new Date().toISOString();
+        }
+        
+        closeRejectPopover();
+    }
+
     // 状态重置与悬停提示函数
     function resetFeedback(ruleId) {
         const ruleItem = document.querySelector(`[data-rule-id="${ruleId}"]`);
@@ -924,8 +986,30 @@
         if (hideTooltipTimer) { clearTimeout(hideTooltipTimer); }
         const feedback = feedbackData[ruleId];
         if (!feedback || feedback.status !== 'rejected') return;
+        
         const tooltip = document.getElementById('tooltip');
-        tooltip.querySelector('#tooltipContent').innerHTML = feedback.reason ? `<strong>拒绝原因：</strong><br>${feedback.reason}` : '<strong>暂无备注</strong>';
+        const tooltipContent = tooltip.querySelector('#tooltipContent');
+        const tooltipActions = tooltip.querySelector('.tooltip-actions');
+        
+        // 根据是否有反馈原因显示不同内容
+        if (feedback.reason) {
+            // 有反馈时：显示原因和修改按钮
+            tooltipContent.innerHTML = `<strong>拒绝原因：</strong><br>${feedback.reason}`;
+            tooltipActions.innerHTML = '<span onclick="editReason(event)" style="color: #007bff; text-decoration: underline; cursor: pointer; font-size: 12px;">修改</span>';
+        } else {
+            // 无反馈时：显示添加提示和快速添加按钮
+            tooltipContent.innerHTML = `
+                <div style="margin-bottom: 8px;">
+                    <strong>已标记为拒绝</strong>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 12px;">
+                    <span style="color: #888;">添加原因帮助改进AI</span>
+                    <span onclick="quickAddReason(event)" style="color: #007bff; text-decoration: underline; cursor: pointer; margin-left: 8px;">立即添加</span>
+                </div>
+            `;
+            tooltipActions.innerHTML = '';
+        }
+        
         const rect = event.target.getBoundingClientRect();
         tooltip.style.left = rect.left + 'px';
         tooltip.style.top = (rect.top - tooltip.offsetHeight - 10) + 'px';
